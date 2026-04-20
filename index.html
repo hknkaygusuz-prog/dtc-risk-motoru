@@ -1,0 +1,1968 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DTC Risk Stratifikasyon Motoru — ATA 2025</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"></noscript>
+<style>
+/* ===== LIGHT THEME ROOT ===== */
+:root {
+  --bg: #f0f4f8;
+  --surface: #ffffff;
+  --surface2: #f7f9fb;
+  --surface3: #edf0f4;
+  --border: #dde3ea;
+  --border2: #c8d0da;
+  --text: #1a202c;
+  --text2: #4a5568;
+  --text3: #8896a4;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.05);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
+
+  /* Risk colors */
+  --r-low:          #166534;
+  --r-low-bg:       #f0fdf4;
+  --r-low-border:   #86efac;
+  --r-low-text:     #15803d;
+  --r-low-soft:     #dcfce7;
+
+  --r-lowint:       #854d0e;
+  --r-lowint-bg:    #fffbeb;
+  --r-lowint-border:#fcd34d;
+  --r-lowint-text:  #92400e;
+  --r-lowint-soft:  #fef3c7;
+
+  --r-inthigh:      #9a3412;
+  --r-inthigh-bg:   #fff7ed;
+  --r-inthigh-border:#fdba74;
+  --r-inthigh-text: #c2410c;
+  --r-inthigh-soft: #ffedd5;
+
+  --r-high:         #991b1b;
+  --r-high-bg:      #fef2f2;
+  --r-high-border:  #fca5a5;
+  --r-high-text:    #b91c1c;
+  --r-high-soft:    #fee2e2;
+
+  /* Cancer type accent colors */
+  --ptc:        #2563eb;
+  --ptc-bg:     #eff6ff;
+  --ptc-border: #93c5fd;
+  --ptc-soft:   #dbeafe;
+  --ptc-dark:   #1d4ed8;
+
+  --ftc:        #7c3aed;
+  --ftc-bg:     #f5f3ff;
+  --ftc-border: #c4b5fd;
+  --ftc-soft:   #ede9fe;
+  --ftc-dark:   #6d28d9;
+
+  --otc:        #0891b2;
+  --otc-bg:     #ecfeff;
+  --otc-border: #67e8f9;
+  --otc-soft:   #cffafe;
+  --otc-dark:   #0e7490;
+
+  /* Active state (neutral) */
+  --accent:     #3b82f6;
+  --accent-bg:  #eff6ff;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { display: block !important; visibility: visible !important; opacity: 1 !important; overflow-x: hidden; }
+manus-content-root { position: fixed !important; top: -9999px !important; left: -9999px !important; width: 0 !important; height: 0 !important; overflow: hidden !important; pointer-events: none !important; z-index: -1 !important; }
+.header, .main, .form-panel, .result-panel { display: block !important; visibility: visible !important; opacity: 1 !important; }
+.main { display: grid !important; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ===== HEADER ===== */
+.header {
+  background: var(--surface);
+  border-bottom: 2px solid var(--border);
+  padding: 16px 28px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-sm);
+}
+
+.header-icon {
+  width: 42px; height: 42px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+  transition: background 0.3s;
+}
+.header-icon.theme-ptc { background: var(--ptc-soft); }
+.header-icon.theme-ftc { background: var(--ftc-soft); }
+.header-icon.theme-otc { background: var(--otc-soft); }
+.header-icon.theme-default { background: #e0e7ff; }
+
+.header-title h1 { font-size: 1rem; font-weight: 700; color: var(--text); }
+.header-title p  { font-size: 0.73rem; color: var(--text3); margin-top: 1px; }
+
+.header-badge {
+  margin-left: auto;
+  font-size: 0.68rem; font-weight: 700;
+  padding: 4px 10px; border-radius: 20px;
+  letter-spacing: 0.8px; text-transform: uppercase;
+  transition: background 0.3s, color 0.3s;
+}
+.header-badge.theme-ptc { background: var(--ptc-soft); color: var(--ptc-dark); border: 1px solid var(--ptc-border); }
+.header-badge.theme-ftc { background: var(--ftc-soft); color: var(--ftc-dark); border: 1px solid var(--ftc-border); }
+.header-badge.theme-otc { background: var(--otc-soft); color: var(--otc-dark); border: 1px solid var(--otc-border); }
+.header-badge.theme-default { background: #e0e7ff; color: #3730a3; border: 1px solid #a5b4fc; }
+
+/* ===== LAYOUT ===== */
+.main {
+  display: grid;
+  grid-template-columns: 390px 1fr;
+  min-height: calc(100vh - 75px);
+}
+
+/* ===== FORM PANEL ===== */
+.form-panel {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 20px;
+  overflow-y: auto;
+  max-height: calc(100vh - 75px);
+  position: sticky;
+  top: 75px;
+}
+
+.section-label {
+  font-size: 0.72rem; font-weight: 800;
+  letter-spacing: 1.8px; text-transform: uppercase;
+  color: var(--text2);
+  margin: 22px 0 10px;
+  padding: 7px 10px;
+  border-radius: 7px;
+  display: flex; align-items: center; gap: 7px;
+}
+.section-label:first-child { margin-top: 0; }
+.section-label .sl-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  display: inline-block; flex-shrink: 0;
+}
+.sl-ptc   { background: var(--ptc); }
+.sl-ftc   { background: var(--ftc); }
+.sl-otc   { background: var(--otc); }
+.sl-gray  { background: var(--text3); }
+
+/* Section label arka plan renk sınıfları */
+.slbg-cancer   { background:#eef6ff; border-left:3px solid #93c5fd; color:#1e40af; }
+.slbg-patient  { background:#f0fdf4; border-left:3px solid #6ee7b7; color:#065f46; }
+.slbg-tumor    { background:#fff0f6; border-left:3px solid #f9a8d4; color:#9d174d; }
+.slbg-ete      { background:#fff7ed; border-left:3px solid #fdba74; color:#9a3412; }
+.slbg-vasc     { background:#fdf4ff; border-left:3px solid #d8b4fe; color:#6b21a8; }
+.slbg-ln       { background:#f0f9ff; border-left:3px solid #7dd3fc; color:#0c4a6e; }
+.slbg-other    { background:#f8fafc; border-left:3px solid #94a3b8; color:#334155; }
+
+/* Toggle butonları — hafif koyu gri tonu */
+.tg-patient .toggle-btn, .tg-tumor .toggle-btn, .tg-ete .toggle-btn,
+.tg-vasc .toggle-btn, .tg-ln .toggle-btn, .tg-other .toggle-btn {
+  background: #eef0f3; border-color: #b8c0cc; color: #374151;
+}
+.tg-patient .toggle-btn:hover, .tg-tumor .toggle-btn:hover, .tg-ete .toggle-btn:hover,
+.tg-vasc .toggle-btn:hover, .tg-ln .toggle-btn:hover, .tg-other .toggle-btn:hover {
+  background: #e2e5ea; border-color: #8896a4; color: #1a202c;
+}
+
+.field { margin-bottom: 12px; }
+
+.field label {
+  display: block; font-size: 0.8rem; font-weight: 500;
+  color: var(--text2); margin-bottom: 5px;
+}
+.field label .req { color: #dc2626; margin-left: 2px; }
+.field label .hint { font-size: 0.68rem; color: var(--text3); font-weight: 400; margin-left: 4px; }
+
+/* ===== CANCER TYPE SELECTOR ===== */
+.cancer-type-grid {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 8px;
+}
+.ct-btn {
+  border: 2px solid var(--border);
+  background: var(--surface2);
+  border-radius: 10px; padding: 10px 6px;
+  cursor: pointer; text-align: center;
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+.ct-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
+.ct-btn .ct-icon { font-size: 1.4rem; display: block; margin-bottom: 4px; }
+.ct-btn .ct-name { font-size: 0.78rem; font-weight: 700; display: block; }
+.ct-btn .ct-sub  { font-size: 0.62rem; color: var(--text3); display: block; margin-top: 2px; line-height: 1.3; }
+
+.ct-btn.active-ptc { border-color: var(--ptc); background: var(--ptc-bg); }
+.ct-btn.active-ptc .ct-name { color: var(--ptc-dark); }
+.ct-btn.active-ftc { border-color: var(--ftc); background: var(--ftc-bg); }
+.ct-btn.active-ftc .ct-name { color: var(--ftc-dark); }
+.ct-btn.active-otc { border-color: var(--otc); background: var(--otc-bg); }
+.ct-btn.active-otc .ct-name { color: var(--otc-dark); }
+
+/* ===== INPUTS ===== */
+.input-row { display: flex; gap: 8px; }
+.input-row .field { flex: 1; }
+
+.field input[type=number] {
+  width: 100%;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9rem;
+  padding: 8px 12px; border-radius: 8px;
+  outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+}
+.field input[type=number]:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+}
+
+/* ===== TOGGLE GROUP ===== */
+.toggle-group { display: flex; gap: 5px; flex-wrap: wrap; }
+
+.toggle-btn {
+  flex: 1; min-width: 70px;
+  background: var(--surface2);
+  border: 1.5px solid var(--border2);
+  color: var(--text2);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.76rem; font-weight: 500;
+  padding: 6px 8px; border-radius: 7px;
+  cursor: pointer; text-align: center;
+  transition: all 0.15s;
+  line-height: 1.3;
+}
+.toggle-btn:hover { border-color: var(--accent); color: var(--text); background: var(--accent-bg); }
+
+.toggle-btn.sel-safe   { background: #f0fdf4; border-color: #86efac; color: #15803d; font-weight: 600; }
+.toggle-btn.sel-warn   { background: #fffbeb; border-color: #fbbf24; color: #92400e; font-weight: 600; }
+.toggle-btn.sel-danger { background: #fff1f2; border-color: #fca5a5; color: #b91c1c; font-weight: 600; }
+.toggle-btn.sel-neutral{ background: #f0f4ff; border-color: #a5b4fc; color: #3730a3; font-weight: 600; }
+
+/* ===== BUTTONS ===== */
+.analyze-btn {
+  width: 100%; border: none;
+  color: #fff; font-family: 'Inter', sans-serif;
+  font-size: 0.9rem; font-weight: 700;
+  padding: 12px; border-radius: 10px;
+  cursor: pointer; margin-top: 18px;
+  transition: opacity 0.2s, transform 0.1s, background 0.3s;
+  letter-spacing: 0.3px;
+}
+.analyze-btn.theme-ptc { background: linear-gradient(135deg, var(--ptc), #60a5fa); }
+.analyze-btn.theme-ftc { background: linear-gradient(135deg, var(--ftc), #a78bfa); }
+.analyze-btn.theme-otc { background: linear-gradient(135deg, var(--otc), #22d3ee); }
+.analyze-btn.theme-default { background: linear-gradient(135deg, #4f46e5, #818cf8); }
+.analyze-btn:hover { opacity: 0.92; }
+.analyze-btn:active { transform: scale(0.99); }
+
+.reset-btn {
+  width: 100%; background: transparent;
+  border: 1.5px solid var(--border2); color: var(--text2);
+  font-family: 'Inter', sans-serif; font-size: 0.8rem;
+  padding: 8px; border-radius: 10px;
+  cursor: pointer; margin-top: 6px; transition: all 0.15s;
+}
+.reset-btn:hover { border-color: var(--text3); color: var(--text); }
+
+/* ===== RESULTS PANEL ===== */
+.results-panel { padding: 24px 28px; overflow-y: auto; }
+
+.placeholder {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  min-height: 400px; text-align: center;
+  color: var(--text3); gap: 12px;
+}
+.placeholder-icon { font-size: 3rem; opacity: 0.3; }
+.placeholder p { font-size: 0.88rem; max-width: 280px; line-height: 1.6; color: var(--text3); }
+
+/* ===== RESULT CARDS ===== */
+.result-container { display: none; }
+.result-container.show { display: block; }
+
+/* RISK BANNER */
+.risk-banner {
+  border-radius: 14px; padding: 22px 24px;
+  margin-bottom: 20px; border: 1.5px solid;
+  display: flex; align-items: flex-start; gap: 18px;
+  box-shadow: var(--shadow);
+}
+.risk-banner.rl-low     { background: var(--r-low-bg);    border-color: var(--r-low-border);    }
+.risk-banner.rl-lowint  { background: var(--r-lowint-bg); border-color: var(--r-lowint-border); }
+.risk-banner.rl-inthigh { background: var(--r-inthigh-bg);border-color: var(--r-inthigh-border);}
+.risk-banner.rl-high    { background: var(--r-high-bg);   border-color: var(--r-high-border);   }
+
+.risk-emoji { font-size: 2.8rem; flex-shrink: 0; line-height: 1; }
+
+.risk-info h2 { font-size: 1.35rem; font-weight: 800; margin-bottom: 4px; }
+.rl-low     .risk-info h2 { color: var(--r-low-text); }
+.rl-lowint  .risk-info h2 { color: var(--r-lowint-text); }
+.rl-inthigh .risk-info h2 { color: var(--r-inthigh-text); }
+.rl-high    .risk-info h2 { color: var(--r-high-text); }
+
+.risk-pct  { font-size: 0.78rem; font-family: 'JetBrains Mono', monospace; margin-bottom: 6px; color: var(--text2); }
+.risk-desc { font-size: 0.82rem; color: var(--text2); line-height: 1.55; max-width: 400px; }
+
+/* CANCER TYPE PILL */
+.ct-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 20px;
+  font-size: 0.72rem; font-weight: 700;
+  margin-bottom: 10px; border: 1.5px solid;
+}
+.ct-pill.theme-ptc { background: var(--ptc-soft); border-color: var(--ptc-border); color: var(--ptc-dark); }
+.ct-pill.theme-ftc { background: var(--ftc-soft); border-color: var(--ftc-border); color: var(--ftc-dark); }
+.ct-pill.theme-otc { background: var(--otc-soft); border-color: var(--otc-border); color: var(--otc-dark); }
+
+/* GAUGE */
+.gauge-wrap { margin-bottom: 20px; }
+.gauge-track {
+  background: var(--surface3); border-radius: 8px;
+  height: 14px; overflow: hidden; position: relative;
+  border: 1px solid var(--border); margin-bottom: 6px;
+}
+.gauge-fill {
+  height: 100%; border-radius: 8px;
+  transition: width 0.9s cubic-bezier(0.4,0,0.2,1);
+}
+.gf-low     { background: linear-gradient(90deg, #22c55e, #4ade80); }
+.gf-lowint  { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.gf-inthigh { background: linear-gradient(90deg, #f97316, #fb923c); }
+.gf-high    { background: linear-gradient(90deg, #ef4444, #f87171); }
+
+.gauge-ticks { display: flex; justify-content: space-between; }
+.gauge-ticks span { font-size: 0.62rem; color: var(--text3); font-family: 'JetBrains Mono', monospace; }
+
+/* TNM BADGES */
+.badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.tnm-badge {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 10px; padding: 8px 14px;
+  box-shadow: var(--shadow-sm); text-align: center; min-width: 80px;
+}
+.tnm-badge .bl { font-size: 0.62rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px; display: block; margin-bottom: 2px; }
+.tnm-badge .bv { font-size: 1rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
+.tnm-badge.bv-ptc .bv { color: var(--ptc); }
+.tnm-badge.bv-ftc .bv { color: var(--ftc); }
+.tnm-badge.bv-otc .bv { color: var(--otc); }
+
+/* FACTOR GRID */
+.factors-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+
+.fc {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 10px; padding: 12px 14px;
+  box-shadow: var(--shadow-sm);
+}
+.fc.fc-danger { background: var(--r-high-soft);    border-color: var(--r-high-border);    }
+.fc.fc-warn   { background: var(--r-inthigh-soft); border-color: var(--r-inthigh-border); }
+.fc.fc-caution{ background: var(--r-lowint-soft);  border-color: var(--r-lowint-border);  }
+.fc.fc-ok     { background: var(--r-low-soft);     border-color: var(--r-low-border);     }
+
+.fc-name  { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text3); margin-bottom: 3px; }
+.fc-val   { font-size: 0.88rem; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+.fc-imp   { font-size: 0.7rem; }
+.fc.fc-danger .fc-imp { color: var(--r-high-text); }
+.fc.fc-warn   .fc-imp { color: var(--r-inthigh-text); }
+.fc.fc-caution.fc-imp { color: var(--r-lowint-text); }
+.fc.fc-ok     .fc-imp { color: var(--r-low-text); }
+
+/* SECTION CARD */
+.sc {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 12px; padding: 16px 18px; margin-bottom: 14px;
+  box-shadow: var(--shadow-sm);
+}
+.sc h3 {
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--text3);
+  margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+
+.fi-list { list-style: none; }
+.fi-list li {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 7px 0; border-bottom: 1px solid var(--surface3);
+  font-size: 0.83rem; color: var(--text2);
+}
+.fi-list li:last-child { border-bottom: none; padding-bottom: 0; }
+
+.fi-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.fd-red    { background: #ef4444; }
+.fd-orange { background: #f97316; }
+.fd-yellow { background: #eab308; }
+.fd-green  { background: #22c55e; }
+
+/* RAI CARD */
+.rai-card {
+  border-radius: 12px; padding: 14px 18px; margin-bottom: 14px;
+  border: 1.5px solid; display: flex; gap: 14px; align-items: flex-start;
+  box-shadow: var(--shadow-sm);
+}
+.rai-card.rai-no      { background: var(--r-low-bg);    border-color: var(--r-low-border);    }
+.rai-card.rai-discuss { background: var(--r-lowint-bg); border-color: var(--r-lowint-border); }
+.rai-card.rai-warn    { background: var(--r-inthigh-bg);border-color: var(--r-inthigh-border);}
+.rai-card.rai-yes     { background: var(--r-high-bg);   border-color: var(--r-high-border);   }
+.rai-icon-lrg { font-size: 1.6rem; flex-shrink: 0; margin-top: 1px; }
+.rai-content h4 { font-size: 0.88rem; font-weight: 700; margin-bottom: 4px; }
+.rai-card.rai-no      .rai-content h4 { color: var(--r-low-text); }
+.rai-card.rai-discuss .rai-content h4 { color: var(--r-lowint-text); }
+.rai-card.rai-warn    .rai-content h4 { color: var(--r-inthigh-text); }
+.rai-card.rai-yes     .rai-content h4 { color: var(--r-high-text); }
+.rai-content p { font-size: 0.8rem; color: var(--text2); line-height: 1.5; }
+
+/* DISCLAIMER */
+.disclaimer {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px 16px;
+  font-size: 0.73rem; color: var(--text3); line-height: 1.6;
+}
+.disclaimer strong { color: var(--text2); }
+
+/* THEME-COLORED ACCENTS */
+.themed-border-ptc { border-left: 4px solid var(--ptc) !important; }
+.themed-border-ftc { border-left: 4px solid var(--ftc) !important; }
+.themed-border-otc { border-left: 4px solid var(--otc) !important; }
+
+/* TOTAL DIAM FIELD (shown only when multifocal) */
+#totalSizeWrap { display: none; }
+
+/* Language toggle */
+.lang-sw { display:flex; background:var(--surface3); border-radius:8px; padding:3px; gap:3px; }
+.lb { background:transparent; border:none; font-family:'Inter',sans-serif; font-size:.72rem;
+  font-weight:600; padding:4px 10px; border-radius:6px; cursor:pointer; color:var(--text3); transition:all .15s; }
+.lb.on { background:var(--surface); color:var(--text); box-shadow:var(--shadow-sm); }
+
+/* Age pill */
+.age-pill { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:20px;
+  font-size:.7rem; font-weight:600; background:var(--surface2); border:1.5px solid var(--border);
+  color:var(--text2); margin-left:8px; }
+.age-pill strong { color:var(--text); font-weight:800; }
+
+/* Surface3 for bg */
+.surface3 { background:var(--surface3); }
+
+/* ══ TNM REFERENCE PANEL ══ */
+.tnm-ref-toggle {
+  width:100%; display:flex; align-items:center; gap:9px;
+  background:var(--surface2); border:1.5px solid var(--border2);
+  border-radius:10px; padding:10px 14px; cursor:pointer;
+  font-family:'Inter',sans-serif; font-size:.8rem; font-weight:600;
+  color:var(--text2); transition:all .2s; text-align:left;
+}
+.tnm-ref-toggle:hover { background:var(--surface3); border-color:var(--text3); color:var(--text); }
+
+#tnmPanel { margin-top:8px; display:flex; flex-direction:column; gap:6px; }
+
+.tnm-cat { border:1.5px solid var(--border); border-radius:10px; overflow:hidden; }
+.tnm-cat-header {
+  display:flex; align-items:center; gap:10px; padding:10px 14px;
+  background:var(--surface2); cursor:pointer; transition:background .15s;
+  font-size:.8rem; font-weight:600; color:var(--text2);
+}
+.tnm-cat-header:hover { background:var(--surface3); }
+.tnm-cat-arrow { margin-left:auto; font-size:.7rem; color:var(--text3); transition:transform .2s; }
+.tnm-cat-arrow.open { transform:rotate(180deg); }
+
+.tnm-cat-badge {
+  width:28px; height:28px; border-radius:7px; display:flex; align-items:center;
+  justify-content:center; font-size:.85rem; font-weight:800; flex-shrink:0;
+}
+.t-badge    { background:#dbeafe; color:#1d4ed8; }
+.n-badge    { background:#ede9fe; color:#6d28d9; }
+.m-badge    { background:#fee2e2; color:#b91c1c; }
+.ajcc-badge { background:#f0fdf4; color:#166534; font-size:.7rem; }
+
+.tnm-cat-body { display:none; border-top:1px solid var(--border); }
+.tnm-cat-body.open { display:block; }
+
+.tnm-row {
+  display:flex; border-bottom:1px solid var(--border);
+}
+.tnm-row:last-child { border-bottom:none; }
+.tnm-row:hover { filter:brightness(.97); }
+.tnm-ok     { background:#f8fffd; }
+.tnm-warn   { background:#fffdf0; }
+.tnm-danger { background:#fff8f8; }
+
+.tnm-code {
+  width:52px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+  font-family:'JetBrains Mono',monospace; font-size:.85rem; font-weight:800;
+  border-right:1px solid var(--border); padding:12px 6px; text-align:center;
+}
+.tnm-ok     .tnm-code { color:#15803d; }
+.tnm-warn   .tnm-code { color:#92400e; }
+.tnm-danger .tnm-code { color:#b91c1c; }
+
+.tnm-desc { padding:10px 13px; flex:1; }
+.tnm-desc strong { display:block; font-size:.79rem; font-weight:700; color:var(--text); margin-bottom:3px; }
+.tnm-desc p { font-size:.73rem; color:var(--text2); line-height:1.55; margin:0; }
+
+.tnm-ref-note {
+  font-size:.65rem; color:var(--text3); text-align:center;
+  padding:8px 12px; background:var(--surface2);
+  border:1px solid var(--border); border-radius:8px; margin-top:2px;
+}
+
+@media (max-width: 860px) {
+  .main { grid-template-columns: 1fr; }
+  .form-panel { max-height: none; position: static; }
+  .factors-grid { grid-template-columns: 1fr; }
+}
+
+/* ══ NÜKS RİSK REFERANS TABLOSU ACCORDION ══ */
+.nuks-accordion-wrap {
+  max-width: none;
+  margin: 20px 0 0;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.18);
+}
+.nuks-accordion-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 28px;
+  background: linear-gradient(135deg, #1a2550 0%, #253070 100%);
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  gap: 16px;
+}
+.nuks-accordion-header:active { filter: brightness(1.08); }
+.nuks-ah-left { display: flex; align-items: center; gap: 14px; }
+.nuks-ah-icon { font-size: 1.6rem; flex-shrink: 0; }
+.nuks-ah-title {
+  font-size: 1rem; font-weight: 700; color: #fff;
+  line-height: 1.3;
+}
+.nuks-ah-sub {
+  font-size: 0.72rem; color: rgba(255,255,255,0.6);
+  font-weight: 300; letter-spacing: 0.5px; margin-top: 2px;
+}
+.nuks-chevron {
+  color: rgba(255,255,255,0.7); font-size: 1rem;
+  transition: transform 0.35s ease; flex-shrink: 0;
+}
+.nuks-accordion-wrap.open .nuks-chevron { transform: rotate(180deg); }
+.nuks-accordion-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.45s cubic-bezier(0.4,0,0.2,1);
+  background: linear-gradient(135deg, #0f1b3d 0%, #1a2c5b 50%, #0d1f42 100%);
+}
+.nuks-accordion-wrap.open .nuks-accordion-body {
+  max-height: 3000px;
+}
+.nuks-inner-pad { padding: 28px 24px 36px; }
+
+
+
+
+/* ══ NÜKS REF - TAMAMEN HARDCODED (var() yok) ══ */
+
+/* Layout */
+#nuksRef { font-family: 'Source Sans 3', -apple-system, sans-serif; color: #1a2550; }
+#nuksRef h1 {
+  font-family: 'Playfair Display', Georgia, serif;
+  color: #ffffff;
+  text-align: center;
+  font-size: clamp(1.1rem, 2.5vw, 1.6rem);
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.4);
+}
+#nuksRef .subtitle {
+  text-align: center;
+  color: rgba(255,255,255,0.65);
+  font-size: 0.78rem;
+  margin-bottom: 24px;
+  font-weight: 300;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+#nuksRef .grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+#nuksRef .cancer-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+#nuksRef .col-header {
+  background: #1a2550;
+  color: #ffffff;
+  text-align: center;
+  padding: 12px 10px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  letter-spacing: 0.8px;
+  border: 2px solid rgba(255,255,255,0.15);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+#nuksRef .col-header small {
+  display: block;
+  font-weight: 300;
+  font-size: 0.68rem;
+  opacity: 0.75;
+  margin-top: 3px;
+}
+
+/* Risk kartları - ortak */
+#nuksRef .risk-card {
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 3px 14px rgba(0,0,0,0.22);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+#nuksRef .risk-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 7px 24px rgba(0,0,0,0.32);
+}
+#nuksRef .risk-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  letter-spacing: 0.4px;
+  user-select: none;
+  border-bottom: 2px solid rgba(0,0,0,0.1);
+}
+#nuksRef .chevron {
+  width: 20px; height: 20px;
+  background: rgba(0,0,0,0.15);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.65rem;
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+}
+#nuksRef .risk-card.open .chevron { transform: rotate(180deg); }
+#nuksRef .badge {
+  font-size: 1rem;
+  font-weight: 900;
+  opacity: 0.9;
+}
+
+/* risk-body animasyon */
+#nuksRef .risk-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.38s cubic-bezier(0.4,0,0.2,1);
+}
+#nuksRef .risk-card.open .risk-body { max-height: 600px; }
+#nuksRef .risk-body-inner { padding: 14px 16px; }
+#nuksRef .criteria-title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+#nuksRef .criteria-list {
+  list-style: none;
+  padding: 0; margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+#nuksRef .criteria-list li {
+  font-size: 0.78rem;
+  padding: 5px 10px 5px 26px;
+  border-radius: 6px;
+  position: relative;
+  line-height: 1.45;
+}
+#nuksRef .criteria-list li::before {
+  content: '▸';
+  position: absolute;
+  left: 8px;
+  font-size: 0.7rem;
+}
+
+/* ── YÜKSEK RİSK ── */
+#nuksRef .card-high .risk-header {
+  background: #c0392b;
+  color: #ffffff;
+}
+#nuksRef .card-high .chevron { background: rgba(255,255,255,0.25); color: #fff; }
+#nuksRef .card-high .risk-body { background: #fdecea; }
+#nuksRef .card-high .criteria-title { color: #922b21; }
+#nuksRef .card-high .criteria-list li {
+  background: rgba(192,57,43,0.08);
+  color: #7b241c;
+}
+#nuksRef .card-high .criteria-list li::before { color: #c0392b; }
+
+/* ── ORTA-YÜKSEK RİSK ── */
+#nuksRef .card-int-high .risk-header {
+  background: #d35400;
+  color: #ffffff;
+}
+#nuksRef .card-int-high .chevron { background: rgba(255,255,255,0.25); color: #fff; }
+#nuksRef .card-int-high .risk-body { background: #fef5e7; }
+#nuksRef .card-int-high .criteria-title { color: #935116; }
+#nuksRef .card-int-high .criteria-list li {
+  background: rgba(211,84,0,0.08);
+  color: #784212; 
+}
+#nuksRef .card-int-high .criteria-list li::before { color: #d35400; }
+
+/* ── DÜŞÜK-ORTA RİSK ── */
+#nuksRef .card-low-int .risk-header {
+  background: #b7950b;
+  color: #ffffff;
+}
+#nuksRef .card-low-int .chevron { background: rgba(255,255,255,0.25); color: #fff; }
+#nuksRef .card-low-int .risk-body { background: #fefce8; }
+#nuksRef .card-low-int .criteria-title { color: #7d6608; }
+#nuksRef .card-low-int .criteria-list li {
+  background: rgba(183,149,11,0.09);
+  color: #6d5700;
+}
+#nuksRef .card-low-int .criteria-list li::before { color: #b7950b; }
+
+/* ── DÜŞÜK RİSK ── */
+#nuksRef .card-low .risk-header {
+  background: #1e8449;
+  color: #ffffff;
+}
+#nuksRef .card-low .chevron { background: rgba(255,255,255,0.25); color: #fff; }
+#nuksRef .card-low .risk-body { background: #eafaf1; }
+#nuksRef .card-low .criteria-title { color: #1a6336; }
+#nuksRef .card-low .criteria-list li {
+  background: rgba(30,132,73,0.08);
+  color: #145a32;
+}
+#nuksRef .card-low .criteria-list li::before { color: #1e8449; }
+
+/* Footnote */
+#nuksRef .footnote {
+  max-width: 1100px;
+  margin: 16px auto 0;
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.55);
+  line-height: 1.65;
+  padding: 0 4px;
+}
+
+/* Mobil */
+@media (max-width: 700px) {
+  #nuksRef .grid { grid-template-columns: 1fr !important; }
+}
+
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet"></noscript>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header" id="mainHeader">
+  <div class="header-icon theme-default" id="headerIcon">🧬</div>
+  <div class="header-title">
+    <h1 id="hdrH1">DTC Yapısal Nüks Riski — Analiz Motoru</h1>
+    <p id="hdrSub">2025 ATA Kılavuzu · Ringel &amp; Sosa et al. · AJCC/UICC 8. Baskı TNM</p>
+  </div>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+    <div class="lang-sw">
+      <button class="lb on" id="lb-tr" onclick="setLang('tr')">🇹🇷 TR</button>
+      <button class="lb"    id="lb-en" onclick="setLang('en')">🇬🇧 EN</button>
+    </div>
+    <div class="header-badge theme-default" id="headerBadge">ATA 2025</div>
+  </div>
+</div>
+
+<div class="main">
+<!-- ============================== FORM ============================== -->
+<div class="form-panel">
+
+  <div class="section-label slbg-cancer"><span class="sl-dot sl-ptc"></span><span data-tr="Kanser Tipi" data-en="Cancer Type">Kanser Tipi</span></div>
+  <div class="cancer-type-grid">
+    <button class="ct-btn" id="ctb-PTC" onclick="selectCT('PTC')">
+      <span class="ct-icon">🔵</span>
+      <span class="ct-name">PTC</span>
+      <span class="ct-sub" data-tr="Papiller Tiroid Karsinomu" data-en="Papillary Thyroid Carcinoma">Papiller Tiroid Karsinomu</span>
+    </button>
+    <button class="ct-btn" id="ctb-FTC" onclick="selectCT('FTC')">
+      <span class="ct-icon">🟣</span>
+      <span class="ct-name">FTC / IEFVPTC</span>
+      <span class="ct-sub" data-tr="Foliküler TK / İnv. Enkaps. Var." data-en="Follicular TC / Inv. Encaps. Variant">Foliküler TK / İnv. Enkaps. Var.</span>
+    </button>
+    <button class="ct-btn" id="ctb-OTC" onclick="selectCT('OTC')">
+      <span class="ct-icon">🩵</span>
+      <span class="ct-name">OTC</span>
+      <span class="ct-sub" data-tr="Onkositik TK (Hürthle)" data-en="Oncocytic TC (Hürthle)">Onkositik TK (Hürthle)</span>
+    </button>
+  </div>
+
+  <div class="field" style="margin-top:10px">
+    <label><span id="L_agr">Agresif Histoloji</span> <span class="hint" id="L_agrhint">(Tall cell, Hobnail, Solid, Diff. Sclerosing, PDTC/DHGTC)</span></label>
+    <div class="toggle-group tg-patient">
+      <button class="toggle-btn" id="tb-agr-hayir" onclick="setT('agresif','hayir','safe')" id="L_no"><span data-tr="Hayır" data-en="No">Hayır</span></button>
+      <button class="toggle-btn" id="tb-agr-evet"  onclick="setT('agresif','evet','danger')"><span data-tr="Evet" data-en="Yes">Evet</span></button>
+    </div>
+  </div>
+
+  <div class="section-label slbg-patient"><span class="sl-dot sl-gray" style="background:#10b981"></span><span id="L_patient">Hasta Bilgileri</span></div>
+
+  <div style="display:flex;gap:8px">
+    <div class="field" style="flex:1">
+      <label><span id="L_age">Hasta Yaşı</span> <span class="req">*</span> <span class="hint" id="L_agehint">(AJCC evrelemesi için)</span></label>
+      <input type="number" id="patientAge" min="1" max="120" step="1" placeholder="örn: 52">
+    </div>
+    <div class="field" style="flex:1">
+      <label><span id="L_sex">Cinsiyet</span></label>
+      <div class="toggle-group tg-patient" style="margin-top:5px">
+        <button class="toggle-btn" id="tb-sex-k" onclick="setT('cinsiyet','kadin','neutral')" id="L_female"><span data-tr="Kadın" data-en="Female">Kadın</span></button>
+        <button class="toggle-btn" id="tb-sex-e" onclick="setT('cinsiyet','erkek','neutral')"><span data-tr="Erkek" data-en="Male">Erkek</span></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label slbg-tumor" id="sl-boyut"><span class="sl-dot sl-gray" style="background:#ec4899"></span><span data-tr="Tümör Boyutu &amp; Lokalizasyon" data-en="Tumor Size &amp; Localization">Tümör Boyutu &amp; Lokalizasyon</span></div>
+
+  <div class="input-row">
+    <div class="field">
+      <label><span data-tr="En büyük odak (cm)" data-en="Largest focus (cm)">En büyük odak (cm)</span> <span class="req">*</span></label>
+      <input type="number" id="tumorSize" min="0" max="20" step="0.1" placeholder="örn: 2.5">
+    </div>
+    <div class="field" id="totalSizeWrap">
+      <label><span data-tr="Tüm odaklar toplamı (cm)" data-en="Total tumor diameter (cm)">Tüm odaklar toplamı (cm)</span> <span class="hint" data-tr="multifokal" data-en="multifocal">multifokal</span></label>
+      <input type="number" id="totalSize" min="0" max="30" step="0.1" placeholder="örn: 3.2">
+    </div>
+  </div>
+
+  <div class="field">
+    <label><span data-tr="Fokalite / Lokalizasyon" data-en="Focality / Localization">Fokalite / Lokalizasyon</span></label>
+    <div class="toggle-group tg-tumor">
+      <button class="toggle-btn" id="tb-loc-unifokal"       onclick="setT('lokasyon','unifokal','safe')"><span data-tr="Unifokal" data-en="Unifocal">Unifokal</span></button>
+      <button class="toggle-btn" id="tb-loc-uni-multi"      onclick="setT('lokasyon','uni-multi','warn')"><span data-tr="Unilateral Multifokal" data-en="Unilateral Multifocal">Unilateral Multifokal</span></button>
+      <button class="toggle-btn" id="tb-loc-bilateral"      onclick="setT('lokasyon','bilateral','danger')"><span data-tr="Bilateral Multifokal" data-en="Bilateral Multifocal">Bilateral Multifokal</span></button>
+    </div>
+  </div>
+
+  <div class="section-label slbg-ete"><span class="sl-dot sl-gray" style="background:#f97316"></span><span data-tr="Ekstratiroid Yayılım (ETE)" data-en="Extrathyroidal Extension (ETE)">Ekstratiroid Yayılım (ETE)</span></div>
+
+  <div class="field">
+    <label><span data-tr="ETE Durumu" data-en="ETE Status">ETE Durumu</span> <span class="req">*</span></label>
+    <div class="toggle-group tg-ete">
+      <button class="toggle-btn" id="tb-ete-yok"        onclick="setT('ete','yok','safe')"><span data-tr="Yok" data-en="None">Yok</span></button>
+      <button class="toggle-btn" id="tb-ete-mikro"      onclick="setT('ete','mikro','warn')"><span data-tr="Mikroskopik ETE" data-en="Microscopic ETE">Mikroskopik ETE</span></button>
+      <button class="toggle-btn" id="tb-ete-strap"      onclick="setT('ete','strap','danger')"><span data-tr="Gross – Strap kas (T3b)" data-en="Gross – Strap muscles (T3b)">Gross – Strap kas (T3b)</span></button>
+      <button class="toggle-btn" id="tb-ete-major"      onclick="setT('ete','major','danger')"><span data-tr="Gross – Majör yapılar (T4)" data-en="Gross – Major structures (T4)">Gross – Majör yapılar (T4)</span></button>
+    </div>
+  </div>
+
+  <div class="section-label slbg-vasc"><span class="sl-dot sl-gray" style="background:#9333ea"></span><span data-tr="Vasküler &amp; Patolojik" data-en="Vascular &amp; Pathologic">Vasküler &amp; Patolojik</span></div>
+
+  <div class="field">
+    <label><span data-tr="Vasküler İnvazyon" data-en="Vascular Invasion">Vasküler İnvazyon</span></label>
+    <div class="toggle-group tg-vasc">
+      <button class="toggle-btn" id="tb-vi-yok"      onclick="setT('vaskuler','yok','safe')"><span data-tr="Yok" data-en="None">Yok</span></button>
+      <button class="toggle-btn" id="tb-vi-sinirli"  onclick="setT('vaskuler','sinirli','warn')"><span data-tr="&lt;4 damar (sınırlı)" data-en="&lt;4 vessels (limited)">&lt;4 damar (sınırlı)</span></button>
+      <button class="toggle-btn" id="tb-vi-kapsamli" onclick="setT('vaskuler','kapsamli','danger')"><span data-tr="≥4 damar (kapsamlı)" data-en="≥4 vessels (extensive)">≥4 damar (kapsamlı)</span></button>
+    </div>
+  </div>
+
+  <div class="field" id="ftcInvField" style="display:none">
+    <label><span data-tr="FTC / OTC İnvazyon Tipi" data-en="FTC / OTC Invasion Type">FTC / OTC İnvazyon Tipi</span></label>
+    <div class="toggle-group tg-vasc">
+      <button class="toggle-btn" id="tb-fi-minimal" onclick="setT('ftcInv','minimal','safe')"><span data-tr="Minimal invazif (yalnızca kapsül)" data-en="Minimally invasive (capsule only)">Minimal invazif (yalnızca kapsül)</span></button>
+      <button class="toggle-btn" id="tb-fi-genis"   onclick="setT('ftcInv','genis','danger')"><span data-tr="Geniş invazif (widely invasive)" data-en="Widely invasive">Geniş invazif (widely invasive)</span></button>
+    </div>
+  </div>
+
+  <div class="section-label slbg-ln"><span class="sl-dot sl-gray" style="background:#0ea5e9"></span><span data-tr="Lenf Nodu" data-en="Lymph Nodes">Lenf Nodu</span></div>
+
+  <div class="field">
+    <label><span data-tr="LN Lokalizasyonu" data-en="LN Location">LN Lokalizasyonu</span></label>
+    <div class="toggle-group tg-ln">
+      <button class="toggle-btn" id="tb-ln-N0"  onclick="setT('lnloc','N0','safe')"><span data-tr="N0 – Yok" data-en="N0 – None">N0 – Yok</span></button>
+      <button class="toggle-btn" id="tb-ln-N1a" onclick="setT('lnloc','N1a','warn')"><span data-tr="N1a – Santral (VI-VII)" data-en="N1a – Central (VI-VII)">N1a – Santral (VI-VII)</span></button>
+      <button class="toggle-btn" id="tb-ln-N1b" onclick="setT('lnloc','N1b','danger')"><span data-tr="N1b – Lateral (I-V)" data-en="N1b – Lateral (I-V)">N1b – Lateral (I-V)</span></button>
+    </div>
+  </div>
+
+  <div class="input-row">
+    <div class="field">
+      <label><span data-tr="Metastatik LN sayısı" data-en="Metastatic LN count">Metastatik LN sayısı</span></label>
+      <input type="number" id="lnSayi" min="0" max="100" step="1" placeholder="adet">
+    </div>
+    <div class="field">
+      <label><span data-tr="En büyük LN (cm)" data-en="Largest LN (cm)">En büyük LN (cm)</span></label>
+      <input type="number" id="lnBoyut" min="0" max="15" step="0.1" placeholder="cm">
+    </div>
+  </div>
+
+  <div class="field">
+    <label><span data-tr="LN Büyüklüğü" data-en="LN Size">LN Büyüklüğü</span></label>
+    <div class="toggle-group tg-ln">
+      <button class="toggle-btn" id="tb-lns-kucuk" onclick="setT('lnsize','kucuk','safe')"><span data-tr="Tümü ≤2 mm" data-en="All ≤2 mm">Tümü ≤2 mm</span></button>
+      <button class="toggle-btn" id="tb-lns-buyuk" onclick="setT('lnsize','buyuk','warn')"><span data-tr="&gt;2 mm (en az 1)" data-en="&gt;2 mm (at least 1)">&gt;2 mm (en az 1)</span></button>
+    </div>
+  </div>
+
+  <div class="field">
+    <label><span data-tr="Ekstranodal Yayılım (ENE)" data-en="Extranodal Extension (ENE)">Ekstranodal Yayılım (ENE)</span></label>
+    <div class="toggle-group tg-ln">
+      <button class="toggle-btn" id="tb-ene-yok" onclick="setT('ene','yok','safe')"><span data-tr="Yok" data-en="None">Yok</span></button>
+      <button class="toggle-btn" id="tb-ene-var" onclick="setT('ene','var','danger')"><span data-tr="Var" data-en="Present">Var</span></button>
+    </div>
+  </div>
+
+  <div class="section-label slbg-other"><span class="sl-dot sl-gray" style="background:#64748b"></span><span data-tr="Diğer" data-en="Other">Diğer</span></div>
+
+  <div class="field">
+    <label><span data-tr="Uzak Metastaz" data-en="Distant Metastasis">Uzak Metastaz</span></label>
+    <div class="toggle-group tg-other">
+      <button class="toggle-btn" id="tb-m-0" onclick="setT('uzakmet','M0','safe')"><span data-tr="M0 – Yok" data-en="M0 – Absent">M0 – Yok</span></button>
+      <button class="toggle-btn" id="tb-m-1" onclick="setT('uzakmet','M1','danger')"><span data-tr="M1 – Var" data-en="M1 – Present">M1 – Var</span></button>
+    </div>
+  </div>
+
+  <div class="field">
+    <label><span data-tr="Cerrahi Sınır" data-en="Surgical Margin">Cerrahi Sınır</span></label>
+    <div class="toggle-group tg-other">
+      <button class="toggle-btn" id="tb-mg-R0"    onclick="setT('margin','R0','safe')"><span data-tr="R0 – Negatif" data-en="R0 – Negative">R0 – Negatif</span></button>
+      <button class="toggle-btn" id="tb-mg-R1ant" onclick="setT('margin','R1ant','warn')"><span data-tr="R1 – Anterior" data-en="R1 – Anterior">R1 – Anterior</span></button>
+      <button class="toggle-btn" id="tb-mg-R1post"onclick="setT('margin','R1post','warn')"><span data-tr="R1 – Posterior" data-en="R1 – Posterior">R1 – Posterior</span></button>
+      <button class="toggle-btn" id="tb-mg-R2"    onclick="setT('margin','R2','danger')"><span data-tr="R2 – Gross rezidü" data-en="R2 – Gross residual">R2 – Gross rezidü</span></button>
+    </div>
+  </div>
+
+  <button class="analyze-btn theme-default" id="analyzeBtn" onclick="analyzeRisk()">🔬 <span data-tr="Risk Analizi Yap" data-en="Analyze Risk">Risk Analizi Yap</span></button>
+  <button class="reset-btn" onclick="resetForm()">↺ <span data-tr="Formu Sıfırla" data-en="Reset Form">Formu Sıfırla</span></button>
+
+  <!-- ══ TNM REFERENCE ACCORDION ══ -->
+  <div style="margin-top:18px">
+    <button class="tnm-ref-toggle" onclick="toggleTNM()" id="tnmToggleBtn">
+      <span>📖</span>
+      <span id="tnmToggleTxt" data-tr="TNM Sınıflandırma Rehberi" data-en="TNM Classification Guide">TNM Sınıflandırma Rehberi</span>
+      <span id="tnmArrow" style="margin-left:auto">▼</span>
+    </button>
+
+    <div id="tnmPanel" style="display:none">
+
+      <!-- T STAGE -->
+      <div class="tnm-cat">
+        <div class="tnm-cat-header" onclick="toggleCat('catT')">
+          <span class="tnm-cat-badge t-badge">T</span>
+          <span data-tr="Primer Tümör" data-en="Primary Tumor">Primer Tümör</span>
+          <span class="tnm-cat-arrow" id="arrT">▼</span>
+        </div>
+        <div class="tnm-cat-body" id="catT">
+          <div class="tnm-row tnm-ok">
+            <div class="tnm-code">T1a</div>
+            <div class="tnm-desc">
+              <strong data-tr="≤1 cm, intratiroid" data-en="≤1 cm, intrathyroidal">≤1 cm, intratiroid</strong>
+              <p data-tr="Tümör tek lobda, kapsül içinde sınırlı. Mükemmel prognoz beklenir." data-en="Tumor confined within thyroid capsule in a single lobe. Excellent prognosis expected.">Tümör tek lobda, kapsül içinde sınırlı. Mükemmel prognoz beklenir.</p>
+            </div>
+          </div>
+          <div class="tnm-row tnm-ok">
+            <div class="tnm-code">T1b</div>
+            <div class="tnm-desc">
+              <strong data-tr=">1 cm – ≤2 cm, intratiroid" data-en=">1 cm – ≤2 cm, intrathyroidal">>1 cm – ≤2 cm, intratiroid</strong>
+              <p data-tr="T1a ile aynı özellikler, boyut biraz daha büyük. Hâlâ düşük riskli grup." data-en="Same characteristics as T1a, slightly larger. Still considered low-risk group.">T1a ile aynı özellikler, boyut biraz daha büyük. Hâlâ düşük riskli grup.</p>
+            </div>
+          </div>
+          <div class="tnm-row tnm-ok">
+            <div class="tnm-code">T2</div>
+            <div class="tnm-desc">
+              <strong data-tr=">2 cm – ≤4 cm, intratiroid" data-en=">2 cm – ≤4 cm, intrathyroidal">>2 cm – ≤4 cm, intratiroid</strong>
+              <p data-tr="Tiroid kapsülü aşılmamış. Boyut büyümüş ancak ekstratiroid yayılım yok." data-en="No thyroid capsule invasion. Size increased but no extrathyroidal extension.">Tiroid kapsülü aşılmamış. Boyut büyümüş ancak ekstratiroid yayılım yok.</p>
+            </div>
+          </div>
+          <div class="tnm-row tnm-warn">
+            <div class="tnm-code">T3a</div>
+            <div class="tnm-desc">
+              <strong data-tr=">4 cm, intratiroid" data-en=">4 cm, intrathyroidal">>4 cm, intratiroid</strong>
+              <p data-tr="Büyük tümör ancak tiroid dışına çıkmamış. ATA 2025'e göre düşük-orta risk faktörü." data-en="Large tumor but confined within thyroid. Per ATA 2025, this is a low-intermediate risk factor.">Büyük tümör ancak tiroid dışına çıkmamış. ATA 2025'e göre düşük-orta risk faktörü.</p>
+            </div>
+          </div>
+          <div class="tnm-row tnm-danger">
+            <div class="tnm-code">T3b</div>
+            <div class="tnm-desc">
+              <strong data-tr="Gross ETE – Strap kaslar" data-en="Gross ETE – Strap muscles">Gross ETE – Strap kaslar</strong>
+              <p data-tr="Tümör strap kaslarına (sternohyoid, sternotiroid, tirohyoid, omohyoid) makroskopik invazyonu var. AJCC 8. baskıda yeni tanımlanan bu kategori, yüksek risk faktörüdür." data-en="Tumor with macroscopic invasion of strap muscles (sternohyoid, sternothyroid, thyrohyoid, omohyoid). Newly defined in AJCC 8th edition; classified as high risk.">Tümör strap kaslarına makroskopik invazyonu var. AJCC 8. baskıda yeni tanımlanan bu kategori, yüksek risk faktörüdür.</p>
+            </div>
+          </div>
+          <div class="tnm-row tnm-danger">
+            <div class="tnm-code">T4a</div>
+            <div class="tnm-desc">
+              <strong data-tr="Majör yapılara invazyon (rezektabl)" data-en="Invasion of major structures (resectable)">Majör yapılara invazyon (rezektabl)</strong>
+              <p data-tr="Subkütan yumuşak doku, larinks, trakea, özofagus veya rekürren laringeal sinire invazyon. Cerrahi olarak çıkarılabilir." data-en="Invasion of subcutaneous soft tissue, larynx, trachea, esophagus, or recurrent laryngeal nerve. Surgically resectable.">Subkütan yumuşak doku, larinks, trakea, özofagus veya rekürren laringeal sinire invazyon. Cerrahi olarak çıkarılabilir.</p>
+            </div>
+          </div>
+          <div class="tnm-row tnm-danger">
+            <div class="tnm-code">T4b</div>
+            <div class="tnm-desc">
+              <strong data-tr="Prevertebral fasya / karotis / mediastinal damar invazyonu" data-en="Prevertebral fascia / carotid / mediastinal vessel invasion">Prevertebral fasya / karotis / mediastinal damar</strong>
+              <p data-tr="Genellikle cerrahi olarak çıkarılamaz (unrezektabl). Çok yüksek riskli grup." data-en="Generally unresectable. Very high-risk group.">Genellikle cerrahi olarak çıkarılamaz (unrezektabl). Çok yüksek riskli grup.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- N STAGE -->
+      <div class="tnm-cat">
+        <div class="tnm-cat-header" onclick="toggleCat('catN')">
+          <span class="tnm-cat-badge n-badge">N</span>
+          <span data-tr="Bölgesel Lenf Nodları" data-en="Regional Lymph Nodes">Bölgesel Lenf Nodları</span>
+          <span class="tnm-cat-arrow" id="arrN">▼</span>
+        </div>
+        <div class="tnm-cat-body" id="catN">
+          <div class="tnm-row tnm-ok">
+            <div class="tnm-code">N0</div>
+            <div class="tnm-desc">
+              <strong data-tr="Bölgesel LN metastazı yok" data-en="No regional LN metastasis">Bölgesel LN metastazı yok</strong>
+              <p data-tr="Klinik veya patolojik olarak boyun lenf nodlarında tümör yayılımı saptanmamış." data-en="No clinically or pathologically confirmed tumor spread to cervical lymph nodes.">Klinik veya patolojik olarak boyun lenf nodlarında tümör yayılımı saptanmamış.</p>
+            </div>
+          </div>
+          <div class="tnm-row tnm-warn">
+            <div class="tnm-code">N1a</div>
+            <div class="tnm-desc">
+              <strong data-tr="Santral bölge LN metastazı (Level VI-VII)" data-en="Central compartment LN metastasis (Level VI-VII)">Santral bölge LN metastazı (Level VI-VII)</strong>
+              <p data-tr="Prelaringeal, pretrakeal, paratrakeal veya üst mediastinal lenf nodlarında metastaz. Tiroid ile aynı cerrahi alanda. ATA 2025'e göre düşük-orta risk (≤5 node, tümü ≤2 mm ise düşük risk)." data-en="Metastasis in prelaryngeal, pretracheal, paratracheal, or upper mediastinal LNs. Same surgical field as thyroid. Per ATA 2025: low-intermediate risk (low risk if ≤5 nodes, all ≤2 mm).">Prelaringeal, pretrakeal, paratrakeal veya üst mediastinal lenf nodlarında metastaz. Tiroid ile aynı cerrahi alanda.</p>
+            </div>
+          </div>
+          <div class="tnm-row tnm-danger">
+            <div class="tnm-code">N1b</div>
+            <div class="tnm-desc">
+              <strong data-tr="Lateral boyun / mediastinal LN metastazı (Level I-V)" data-en="Lateral cervical / mediastinal LN metastasis (Level I-V)">Lateral boyun / mediastinal LN metastazı (Level I-V)</strong>
+              <p data-tr="Juguler zincir, posterior triangle veya üst mediastinal lenf nodlarında metastaz. Santrale göre daha yüksek nüks riski. En büyük LN ≥3 cm ise yüksek risk kategorisi." data-en="Metastasis in jugular chain, posterior triangle, or superior mediastinal nodes. Higher recurrence risk than central. If largest LN ≥3 cm, classified as high risk.">Juguler zincir veya posterior triangle lenf nodlarında metastaz. Santrale göre daha yüksek nüks riski.</p>
+            </div>
+          </div>
+          <div class="tnm-row tnm-danger">
+            <div class="tnm-code">ENE</div>
+            <div class="tnm-desc">
+              <strong data-tr="Ekstranodal Yayılım" data-en="Extranodal Extension">Ekstranodal Yayılım (ENE)</strong>
+              <p data-tr="Tümörün lenf nodu kapsülünü aşarak çevre yumuşak dokuya yayılımı. ATA 2025'e göre T3a/T3b/T4 veya cN1≥3cm ile birlikte YÜKSEK risk; T1/T2 ile yalnız ENE → ORTA-YÜKSEK risk kriteridir." data-en="Tumor penetrates the lymph node capsule and invades surrounding soft tissue. Per ATA 2025: HIGH risk with T3a/T3b/T4 or cN1≥3cm; Intermediate-HIGH risk with T1/T2 alone.">Tümörün lenf nodu kapsülünü aşarak çevre yumuşak dokuya yayılımı. ATA 2025: T3a/T3b/T4 veya cN1≥3cm ile YÜKSEK risk; T1/T2 ile yalnız ENE → ORTA-YÜKSEK risk.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- M STAGE -->
+      <div class="tnm-cat">
+        <div class="tnm-cat-header" onclick="toggleCat('catM')">
+          <span class="tnm-cat-badge m-badge">M</span>
+          <span data-tr="Uzak Metastaz" data-en="Distant Metastasis">Uzak Metastaz</span>
+          <span class="tnm-cat-arrow" id="arrM">▼</span>
+        </div>
+        <div class="tnm-cat-body" id="catM">
+          <div class="tnm-row tnm-ok">
+            <div class="tnm-code">M0</div>
+            <div class="tnm-desc">
+              <strong data-tr="Uzak metastaz yok" data-en="No distant metastasis">Uzak metastaz yok</strong>
+              <p data-tr="Akciğer, kemik, beyin veya diğer organlarda tümör yayılımı saptanmamış." data-en="No tumor spread to lungs, bone, brain, or other distant organs detected.">Akciğer, kemik, beyin veya diğer organlarda tümör yayılımı saptanmamış.</p>
+            </div>
+          </div>
+          <div class="tnm-row tnm-danger">
+            <div class="tnm-code">M1</div>
+            <div class="tnm-desc">
+              <strong data-tr="Uzak metastaz var" data-en="Distant metastasis present">Uzak metastaz var</strong>
+              <p data-tr="En sık akciğer (%50), ardından kemik (%25) ve beyin. M1, yaştan bağımsız olarak ATA 2025'te mutlak yüksek risk kriteridir ve RAI tedavisini zorunlu kılar." data-en="Most commonly lung (50%), then bone (25%) and brain. M1 is an absolute high-risk criterion per ATA 2025 regardless of age, mandating RAI therapy.">En sık akciğer (%50), ardından kemik ve beyin. Yaştan bağımsız mutlak yüksek risk kriteridir.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AJCC STAGE -->
+      <div class="tnm-cat">
+        <div class="tnm-cat-header" onclick="toggleCat('catAJCC')">
+          <span class="tnm-cat-badge ajcc-badge">AJCC</span>
+          <span data-tr="Evreleme (8. Baskı, 2017)" data-en="Staging (8th Edition, 2017)">Evreleme (8. Baskı, 2017)</span>
+          <span class="tnm-cat-arrow" id="arrAJCC">▼</span>
+        </div>
+        <div class="tnm-cat-body" id="catAJCC">
+          <div class="tnm-row tnm-ok" style="background:#f0fdf4">
+            <div class="tnm-code" style="color:#15803d">I</div>
+            <div class="tnm-desc">
+              <strong data-tr="< 55 yaş: Her T, Her N, M0 — ≥ 55 yaş: T1-2, N0, M0" data-en="< 55 yrs: Any T, Any N, M0 — ≥ 55 yrs: T1-2, N0, M0">{"<"} 55 yaş: Her T, Her N, M0 &nbsp;|&nbsp; ≥ 55 yaş: T1-2, N0, M0</strong>
+              <p data-tr="55 yaş altındaki hastalarda, N1 olsa bile M0 ise Evre I. AJCC 8. baskıyla yaş kesim noktası 45'ten 55'e yükseltildi. 10 yıllık hastalığa özgü sağkalım >%98." data-en="Patients under 55, even with N1 disease, are Stage I if M0. Age cutoff raised from 45 to 55 in AJCC 8th edition. 10-year disease-specific survival >98%.">55 yaş altında N1 olsa bile M0 ise Evre I. Yaş kesim noktası 8. baskıyla 45→55'e yükseltildi.</p>
+            </div>
+          </div>
+          <div class="tnm-row" style="background:#fffbeb">
+            <div class="tnm-code" style="color:#92400e">II</div>
+            <div class="tnm-desc">
+              <strong data-tr="< 55 yaş: Her T, Her N, M1 — ≥ 55 yaş: T1-2/N1 veya T3a-b/Her N, M0" data-en="< 55 yrs: Any T, Any N, M1 — ≥ 55 yrs: T1-2/N1 or T3a-b/Any N, M0">{"<"} 55 yaş: M1 &nbsp;|&nbsp; ≥ 55 yaş: N1 veya T3a/T3b, M0</strong>
+              <p data-tr="55 yaş üstünde T3a/T3b veya herhangi bir N1 durumu Evre II'ye yükseltir (M0 ise). 10 yıllık sağkalım ~%85-95." data-en="In patients ≥55, T3a/T3b or any N1 status (with M0) is Stage II. 10-year survival ~85-95%.">55 yaş üstünde T3a/b veya N1 durumu Evre II'ye yükseltir (M0 ise).</p>
+            </div>
+          </div>
+          <div class="tnm-row" style="background:#fff7ed">
+            <div class="tnm-code" style="color:#c2410c">III</div>
+            <div class="tnm-desc">
+              <strong data-tr="≥ 55 yaş: T4a, Her N, M0" data-en="≥ 55 yrs: T4a, Any N, M0">≥ 55 yaş: T4a, Her N, M0</strong>
+              <p data-tr="Majör yapılara (larinks, trakea, özofagus, RLN) invazyon ama cerrahi rezektabl. 10 yıllık sağkalım ~%70-85." data-en="Invasion of major structures (larynx, trachea, esophagus, RLN) but surgically resectable. 10-year survival ~70-85%.">Majör yapılara invazyon ancak cerrahi olarak çıkarılabilir.</p>
+            </div>
+          </div>
+          <div class="tnm-row tnm-danger">
+            <div class="tnm-code" style="color:#b91c1c">IVA</div>
+            <div class="tnm-desc">
+              <strong data-tr="≥ 55 yaş: T4b, Her N, M0" data-en="≥ 55 yrs: T4b, Any N, M0">≥ 55 yaş: T4b, Her N, M0</strong>
+              <p data-tr="Prevertebral fasya, karotis veya mediastinal damarlara invazyon. Genellikle rezektabl değil. 10 yıllık sağkalım ~%50." data-en="Invasion of prevertebral fascia, carotid, or mediastinal vessels. Usually unresectable. 10-year survival ~50%.">Prevertebral fasya, karotis veya mediastinal damarlara invazyon. Genellikle rezektabl değil.</p>
+            </div>
+          </div>
+          <div class="tnm-row tnm-danger">
+            <div class="tnm-code" style="color:#b91c1c">IVB</div>
+            <div class="tnm-desc">
+              <strong data-tr="Her T, Her N, M1 (≥ 55 yaş)" data-en="Any T, Any N, M1 (≥ 55 yrs)">Her T, Her N, M1 (≥ 55 yaş)</strong>
+              <p data-tr="Uzak organ metastazı. RAI ve sistemik tedaviler gereklidir. 10 yıllık sağkalım ~%25-50." data-en="Distant organ metastasis. RAI and systemic therapies required. 10-year survival ~25-50%.">Uzak organ metastazı. RAI ve sistemik tedaviler gereklidir.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tnm-ref-note" data-tr="AJCC/UICC 8. Baskı TNM Sınıflandırması (2017) • DTC = Diferansiye Tiroid Karsinomu (PTC + FTC + OTC)" data-en="AJCC/UICC 8th Edition TNM Classification (2017) • DTC = Differentiated Thyroid Carcinoma (PTC + FTC + OTC)">AJCC/UICC 8. Baskı TNM Sınıflandırması (2017) • DTC = Diferansiye Tiroid Karsinomu</div>
+
+    </div><!-- /tnmPanel -->
+  </div><!-- /tnm wrapper -->
+
+<!-- ══ NÜKS RİSK REFERANS TABLOSU ══ -->
+<div class="nuks-accordion-wrap" style="max-width:none;margin-top:20px;border-radius:14px;" id="nuksAccordion">
+  <div class="nuks-accordion-header" onclick="toggleNuksAccordion()" ontouchstart="">
+    <div class="nuks-ah-left">
+      <span class="nuks-ah-icon">📊</span>
+      <div>
+        <div class="nuks-ah-title">Nüks Riski Referans Tablosu</div>
+        <div class="nuks-ah-sub">PTC · FTC/IEFVPTC · OTC — ATA 2025 / WHO 2022 Sınıflaması</div>
+      </div>
+    </div>
+    <span class="nuks-chevron">▼</span>
+  </div>
+  <div class="nuks-accordion-body">
+    <div class="nuks-inner-pad">
+      <div id="nuksRef">
+        <h1>Diferansiye Tiroid Kanserinde Tahmini Yapısal Nüks Riski</h1>
+<p class="subtitle">Estimated Risk of Structural Recurrence — 2022 ATA/WHO Sınıflaması</p>
+
+<div class="grid">
+
+  <!-- PTC -->
+  <div class="cancer-col">
+    <div class="col-header">
+      PTC ve Alt Tipleri
+      <small>Papiller Tiroid Karsinomu</small>
+    </div>
+
+    <!-- HIGH -->
+    <div class="risk-card card-high" onclick="toggle(this)">
+      <div class="risk-header">
+        <span>YÜKSEK RİSK</span>
+        <span class="badge">&gt;%30</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="risk-body">
+        <div class="risk-body-inner">
+          <p class="criteria-title">Aşağıdakilerden herhangi biriyle birlikte T3a (>4 cm, intratiroid) + mikroskopik ETE, T3b (strap kas invazyonu) veya T4 (ekstratiroid invazyon); VEYA HERHANGİ bir T:</p>
+          <ul class="criteria-list">
+            <li>Kötü diferansiye veya yüksek dereceli tümör</li>
+            <li>Gross inkomplet rezeksiyon (R2)</li>
+            <li>cN1 ≥ 3 cm</li>
+            <li>Ekstranodal yayılım (ENE)</li>
+            <li>Uzak metastaz (M1)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- INT-HIGH -->
+    <div class="risk-card card-int-high" onclick="toggle(this)">
+      <div class="risk-header">
+        <span>ORTA-YÜKSEK RİSK</span>
+        <span class="badge">%16-30</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="risk-body">
+        <div class="risk-body-inner">
+          <p class="criteria-title">Aşağıdakilerden herhangi biriyle birlikte T1 (≤2 cm), T2 (2-4 cm) veya T3a (>4 cm, intratiroid):</p>
+          <ul class="criteria-list">
+            <li>Bilateral multifokalite &gt;1 cm</li>
+            <li>Klinik olarak belirgin lateral LN metastazı (cN1b) &lt;3 cm</li>
+            <li>2 veya daha fazla düşük-orta risk faktörü</li>
+            <li>Agresif histoloji</li>
+            <li>Vasküler invazyon</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOW-INT -->
+    <div class="risk-card card-low-int" onclick="toggle(this)">
+      <div class="risk-header">
+        <span>DÜŞÜK-ORTA RİSK</span>
+        <span class="badge">%10-15</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="risk-body">
+        <div class="risk-body-inner">
+          <p class="criteria-title">T3a (>4 cm, intratiroid); veya aşağıdakilerden herhangi biriyle birlikte T1 (≤2 cm) ya da T2 (2-4 cm):</p>
+          <ul class="criteria-list">
+            <li>Unilateral multifokalite</li>
+            <li>Mikroskopik ETE</li>
+            <li>cN1a veya pN1a &gt;2 mm* ya da &gt;5 LN</li>
+            <li>Negatif cerrahi sınır veya mikroskopik + posterior sınır (R1)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOW -->
+    <div class="risk-card card-low" onclick="toggle(this)">
+      <div class="risk-header">
+        <span>DÜŞÜK RİSK</span>
+        <span class="badge">&lt;%10</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="risk-body">
+        <div class="risk-body-inner">
+          <p class="criteria-title">T1 (≤2 cm) ve T2 (≤4 cm):</p>
+          <ul class="criteria-list">
+            <li>Unifokal</li>
+            <li>pN0a, cN0 ve pN1a (≤5 LN, hepsi ≤2 mm)</li>
+            <li>Negatif sınır veya yalnızca mikroskopik + anterior sınır (R1)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FTC/IEFVPTC -->
+  <div class="cancer-col">
+    <div class="col-header">
+      FTC / IEFVPTC
+      <small>Foliküler TK / İnvazif Enkapsüle Foliküler Varyant PTC</small>
+    </div>
+
+    <!-- HIGH -->
+    <div class="risk-card card-high" onclick="toggle(this)">
+      <div class="risk-header">
+        <span>YÜKSEK RİSK</span>
+        <span class="badge">&gt;%30</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="risk-body">
+        <div class="risk-body-inner">
+          <p class="criteria-title">Aşağıdakilerden herhangi biriyle birlikte T3a (>4 cm, intratiroid) + mikroskopik ETE, T3b (strap kas invazyonu) veya T4 (ekstratiroid invazyon); VEYA HERHANGİ bir T:</p>
+          <ul class="criteria-list">
+            <li>Kötü diferansiye veya yüksek dereceli tümör</li>
+            <li>Geniş invazif (widely invasive)</li>
+            <li>Enkapsüle anjiyoinvazif: kapsamlı vasküler invazyon ≥4 damar</li>
+            <li>cN1 ≥ 3 cm</li>
+            <li>Ekstranodal yayılım (ENE)</li>
+            <li>Uzak metastaz (M1)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- INT-HIGH -->
+    <div class="risk-card card-int-high" onclick="toggle(this)">
+      <div class="risk-header">
+        <span>ORTA-YÜKSEK RİSK</span>
+        <span class="badge">%16-30</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="risk-body">
+        <div class="risk-body-inner">
+          <p class="criteria-title">Aşağıdakilerden herhangi biriyle birlikte T1 (≤2 cm), T2 (2-4 cm) veya T3a (>4 cm, intratiroid):</p>
+          <ul class="criteria-list">
+            <li>Klinik olarak belirgin lateral LN metastazı (cN1b) &lt;3 cm</li>
+            <li>2 veya daha fazla düşük-orta risk faktörü</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOW-INT -->
+    <div class="risk-card card-low-int" onclick="toggle(this)">
+      <div class="risk-header">
+        <span>DÜŞÜK-ORTA RİSK</span>
+        <span class="badge">%10-15</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="risk-body">
+        <div class="risk-body-inner">
+          <p class="criteria-title">T3a (>4 cm, intratiroid); veya aşağıdakilerden herhangi biriyle birlikte T1 (≤2 cm) ya da T2 (2-4 cm):</p>
+          <ul class="criteria-list">
+            <li>Mikroskopik ETE</li>
+            <li>Sınırlı vasküler invazyon &lt;4 damar*</li>
+            <li>cN1a veya pN1a &gt;2 mm* ya da &gt;5 LN</li>
+            <li>Negatif cerrahi sınır veya mikroskopik + posterior sınır (R1)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOW -->
+    <div class="risk-card card-low" onclick="toggle(this)">
+      <div class="risk-header">
+        <span>DÜŞÜK RİSK</span>
+        <span class="badge">&lt;%10</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="risk-body">
+        <div class="risk-body-inner">
+          <p class="criteria-title">T1 (≤2 cm) ve T2 (≤4 cm):</p>
+          <ul class="criteria-list">
+            <li>Minimal invazif: Yalnızca kapsül invazyonu*</li>
+            <li>pN0a, cN0 ve pN1a (≤5 LN, hepsi ≤2 mm)</li>
+            <li>Negatif sınır veya yalnızca mikroskopik + anterior sınır (R1)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OTC -->
+  <div class="cancer-col">
+    <div class="col-header">
+      OTC
+      <small>Onkositik Tiroid Karsinomu (Hürthle Hücreli)</small>
+    </div>
+
+    <!-- HIGH -->
+    <div class="risk-card card-high" onclick="toggle(this)">
+      <div class="risk-header">
+        <span>YÜKSEK RİSK</span>
+        <span class="badge">&gt;%30</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="risk-body">
+        <div class="risk-body-inner">
+          <p class="criteria-title">Aşağıdakilerden herhangi biriyle birlikte T3a (>4 cm, intratiroid) + mikroskopik ETE, T3b (strap kas invazyonu) veya T4 (ekstratiroid invazyon); VEYA HERHANGİ bir T:</p>
+          <ul class="criteria-list">
+            <li>Kötü diferansiye veya yüksek dereceli tümör</li>
+            <li>Geniş invazif (widely invasive)</li>
+            <li>Enkapsüle anjiyoinvazif: kapsamlı vasküler invazyon ≥4 damar</li>
+            <li>cN1 ≥ 3 cm</li>
+            <li>Ekstranodal yayılım (ENE)</li>
+            <li>Uzak metastaz (M1)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- INT-HIGH -->
+    <div class="risk-card card-int-high" onclick="toggle(this)">
+      <div class="risk-header">
+        <span>ORTA-YÜKSEK RİSK</span>
+        <span class="badge">%16-30</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="risk-body">
+        <div class="risk-body-inner">
+          <p class="criteria-title">Aşağıdakilerden herhangi biriyle birlikte T1 (≤2 cm), T2 (2-4 cm) veya T3a (>4 cm, intratiroid):</p>
+          <ul class="criteria-list">
+            <li>Klinik olarak belirgin lateral LN metastazı (cN1b) &lt;3 cm</li>
+            <li>2 veya daha fazla düşük-orta risk faktörü</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOW-INT -->
+    <div class="risk-card card-low-int" onclick="toggle(this)">
+      <div class="risk-header">
+        <span>DÜŞÜK-ORTA RİSK</span>
+        <span class="badge">%10-15</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="risk-body">
+        <div class="risk-body-inner">
+          <p class="criteria-title">T3a (>4 cm, intratiroid); veya aşağıdakilerden herhangi biriyle birlikte T1 (≤2 cm) ya da T2 (2-4 cm):</p>
+          <ul class="criteria-list">
+            <li>Mikroskopik ETE</li>
+            <li>Sınırlı vasküler invazyon &lt;4 damar*</li>
+            <li>cN1a veya pN1a &gt;2 mm* ya da &gt;5 LN</li>
+            <li>Negatif cerrahi sınır veya mikroskopik + posterior sınır (R1)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOW -->
+    <div class="risk-card card-low" onclick="toggle(this)">
+      <div class="risk-header">
+        <span>DÜŞÜK RİSK</span>
+        <span class="badge">&lt;%10</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="risk-body">
+        <div class="risk-body-inner">
+          <p class="criteria-title">T1 (≤2 cm) ve T2 (≤4 cm):</p>
+          <ul class="criteria-list">
+            <li>Minimal invazif: Yalnızca kapsül invazyonu*</li>
+            <li>pN0a, cN0 ve pN1a (≤5 LN, hepsi ≤2 mm)</li>
+            <li>Negatif sınır veya yalnızca mikroskopik + anterior sınır (R1)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="legend">
+  <strong>* Not:</strong> Düşük-orta ve orta-yüksek risk grupları arasındaki lenf nodları için net kesim noktaları bulunmamaktadır. Genel olarak daha küçük boyut ve daha az lenf nodu metastazı daha düşük nüks riskiyle ilişkilidir.<br>
+  <strong>Kısaltmalar:</strong> PTC: Papiller Tiroid Karsinomu · FTC: Foliküler Tiroid Karsinomu · IEFVPTC: İnvazif Enkapsüle Foliküler Varyant PTC · OTC: Onkositik Tiroid Karsinomu · ETE: Ekstratiroid Yayılım · ENE: Ekstranodal Yayılım · LN: Lenf Nodu · *: WHO 2022 tanımı
+</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+</div><!-- /form-panel -->
+
+<!-- ============================== RESULTS ============================== -->
+<div class="results-panel">
+
+  <div class="placeholder" id="placeholder">
+    <div class="placeholder-icon">🔬</div>
+    <p><span data-tr="Sol panelden hasta verilerini girerek ATA 2025 kriterlerine göre yapısal nüks riskini hesaplayın." data-en="Enter patient data in the left panel to calculate structural recurrence risk per ATA 2025 guidelines.">Sol panelden hasta verilerini girerek ATA 2025 kriterlerine göre yapısal nüks riskini hesaplayın.</span></p>
+  </div>
+
+  <div class="result-container" id="rc">
+
+    <!-- Cancer type pill -->
+    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:9px">
+      <div id="ctPill" class="ct-pill"></div>
+      <div id="agePill" class="age-pill" style="display:none"></div>
+    </div>
+
+    <!-- Risk Banner -->
+    <div class="risk-banner" id="riskBanner">
+      <div class="risk-emoji" id="riskEmoji"></div>
+      <div class="risk-info">
+        <h2 id="riskTitle"></h2>
+        <div class="risk-pct" id="riskPct"></div>
+        <div class="risk-desc" id="riskDesc"></div>
+      </div>
+    </div>
+
+    <!-- Gauge -->
+    <div class="gauge-wrap">
+      <div class="gauge-track">
+        <div class="gauge-fill" id="gaugeFill" style="width:0%"></div>
+      </div>
+      <div class="gauge-ticks">
+        <span data-tr="Düşük &lt;10%" data-en="Low &lt;10%">Düşük &lt;10%</span>
+        <span data-tr="Düşük-Orta 10-15%" data-en="Low-Int 10-15%">Düşük-Orta 10-15%</span>
+        <span data-tr="Orta-Yüksek 16-30%" data-en="Int-High 16-30%">Orta-Yüksek 16-30%</span>
+        <span data-tr="Yüksek &gt;30%" data-en="High &gt;30%">Yüksek &gt;30%</span>
+      </div>
+    </div>
+
+    <!-- TNM Badges -->
+    <div class="badge-row" id="badgeRow"></div>
+
+    <!-- Factor Cards -->
+    <div class="factors-grid" id="factorsGrid"></div>
+
+    <!-- Risk Factors -->
+    <div class="sc" id="scRisk">
+      <h3><span data-tr="⚠️ Risk Artırıcı Faktörler" data-en="⚠️ Risk-Increasing Factors">⚠️ Risk Artırıcı Faktörler</span></h3>
+      <ul class="fi-list" id="riskList"></ul>
+    </div>
+
+    <!-- Protective -->
+    <div class="sc" id="scProt" style="display:none">
+      <h3><span data-tr="✅ Düşük Risk Kriterleri (karşılanan)" data-en="✅ Low-Risk Criteria Met">✅ Düşük Risk Kriterleri (karşılanan)</span></h3>
+      <ul class="fi-list" id="protList"></ul>
+    </div>
+
+    <!-- RAI -->
+    <div id="raiDiv"></div>
+
+    <!-- Disclaimer -->
+    <div class="disclaimer">
+      <strong data-tr="⚠️ Klinik Karar Destek Aracı:" data-en="⚠️ Clinical Decision Support Tool:">⚠️ Klinik Karar Destek Aracı:</strong> <span data-tr="Bu araç ATA 2025 kılavuzuna (Ringel &amp; Sosa et al.) dayalı bir referans yardımcısıdır. Kesin sınıflandırma için AJCC/UICC 8. baskı TNM, postoperatif görüntüleme ve serum Tg/TgAb sonuçları birlikte değerlendirilmelidir. Tedavi kararları hasta-hekim ortak karar alma sürecinde verilmeli, multidisipliner tümör kurulu görüşü alınmalıdır." data-en="This tool is based on the ATA 2025 guidelines (Ringel &amp; Sosa et al.). Definitive classification requires AJCC/UICC 8th edition TNM staging, postoperative imaging, and serum Tg/TgAb results. Treatment decisions should be made through shared patient-clinician decision-making with multidisciplinary tumor board input.">Bu araç ATA 2025 kılavuzuna (Ringel &amp; Sosa et al.) dayalı bir referans yardımcısıdır. Kesin sınıflandırma için AJCC/UICC 8. baskı TNM, postoperatif görüntüleme ve serum Tg/TgAb sonuçları birlikte değerlendirilmelidir. Tedavi kararları hasta-hekim ortak karar alma sürecinde verilmeli, multidisipliner tümör kurulu görüşü alınmalıdır.</span>
+    </div>
+
+  </div><!-- /rc -->
+</div><!-- /results-panel -->
+</div><!-- /main -->
+
+<script>
+// ===== TRANSLATIONS =====
+const L = {
+  tr: {
+    hdrH1:'DTC Yapısal Nüks Riski — Analiz Motoru',
+    hdrSub:'2025 ATA Kılavuzu · Ringel & Sosa et al. · AJCC/UICC 8. Baskı TNM',
+    highRisk:'YÜKSEK RİSK', highPct:'Yapısal Nüks Riski: >%30',
+    highDesc:'Yoğun takip, muhtemelen RAI tedavisi ve TSH supresyonu endikedir. Multidisipliner tümör kurulu değerlendirmesi önerilir.',
+    ihRisk:'ORTA-YÜKSEK RİSK', ihPct:'Yapısal Nüks Riski: %16-30',
+    ihDesc:'Bireyselleştirilmiş takip planı gereklidir. RAI ve TSH supresyonu tartışılmalıdır.',
+    liRisk:'DÜŞÜK-ORTA RİSK', liPct:'Yapısal Nüks Riski: %10-15',
+    liDesc:'Orta yoğunlukta takip önerilir. RAI endikasyonu bireysel değerlendirme gerektirir.',
+    lowRisk:'DÜŞÜK RİSK', lowPct:'Yapısal Nüks Riski: <%10',
+    lowDesc:'Rutin takip yeterlidir. RAI tedavisi genellikle endike değildir. TSH baskısı gerekmeyebilir.',
+    fSize:'Tümör Boyutu', fETE:'ETE', fLN:'LN Durumu', fVI:'Vask. İnvazyon',
+    fM:'Uzak Metastaz', fMargin:'Cerrahi Sınır',
+    ctLabels:{PTC:'Papiller TK (PTC)',FTC:'Foliküler TK / IEFVPTC',OTC:'Onkositik TK (OTC)'},
+    agePill:(a,s)=>`👤 <strong>${a}</strong> yaş · AJCC: <strong>${s}</strong>`,
+    noRisk:'Belirgin risk artırıcı faktör saptanmadı.',
+    totalLabel:'Toplam', ageLabel:'Yaş',
+    typeLabel:'Tip', hRisk:'⚠️ Risk Artırıcı Faktörler', hProt:'✅ Düşük Risk Kriterleri',
+    raiYesTitle:'RAI Tedavisi: Endike',
+    raiYesText:'ATA 2025 Tablo 10 uyarınca yüksek risk grubunda total tiroidektomi sonrası RAI (adjuvan/terapötik) önerilmektedir. Doz ve hazırlık protokolü bireyselleştirilmelidir.',
+    raiWarnTitle:'RAI: Paylaşımlı Karar ile Değerlendirilmeli',
+    raiWarnText:'Orta-yüksek risk grubunda RAI endikasyonu bireysel olarak değerlendirilmelidir. Histoloji, görüntüleme ve Tg düzeyleri yönlendirici olacaktır.',
+    raiDiscTitle:'RAI: Seçilmiş Vakalarda Düşünülebilir',
+    raiDiscText:'Düşük-orta risk grubunda RAI endikasyonu tartışmalıdır. Seçilmiş hastalarda düşük doz RAI (1.1-1.85 GBq) değerlendirilebilir.',
+    raiNoTitle:'RAI: Rutin Olarak Önerilmez',
+    raiNoText:"ATA 2025 uyarınca düşük risk grubunda RAI'nin klinik yararı gösterilememiştir (ESTIMABL2). Lobektomi sonrası genellikle gereksizdir.",
+    btnAnalyze:'Risk Analizi Yap',
+    rf:{
+      m1:'Uzak metastaz (M1)', r2:'Gross inkomplet rezeksiyon (R2)', ene:'Ekstranodal yayılım (ENE) — T3a/T3b/T4 veya cN1≥3cm ile yüksek risk', eneIntHigh:'Ekstranodal yayılım (ENE) — T1/T2 ile orta-yüksek risk (INT-HIGH)',
+      lnbig:b=>`En büyük LN ≥3 cm (${b} cm)`,
+      agr:'Agresif/yüksek dereceli histoloji (PDTC/DHGTC dahil)',
+      strap:'Gross ETE – Strap kaslar (T3b)', major:'Gross ETE – Majör yapılar (T4a/T4b)',
+      viext:ct=>`Kapsamlı vasküler invazyon ≥4 damar (${ct})`,
+      wide:ct=>`Geniş invazif (widely invasive) — ${ct}`,
+      bilateral:d=>`Bilateral multifokalite, toplam çap ${d} cm`,
+      n1b:b=>`Lateral LN metastazı (cN1b) <3 cm (${b>0?b+' cm':'boyut belirtilmedi'})`,
+      viPTC:'Vasküler invazyon (PTC) — orta-yüksek risk',
+      T3a:'T3a (>4 cm, intratiroid)', microete:'Mikroskopik ETE',
+      unimulti:d=>`Unilateral multifokalite (toplam çap: ${d} cm)`,
+      n1a:(n,big)=>`Santral LN (N1a): ${n} adet${big?', >2 mm':''}`,
+      r1post:'Posterior R1 sınır — bağımsız risk faktörü',
+      vilim:ct=>`Sınırlı vasküler invazyon <4 damar (${ct})`,
+      upgrade:'2+ düşük-orta risk faktörü → Orta-yüksek riske yükselme',
+    },
+    pf:{
+      unifocal:'Unifokal tümör', size:s=>`Tümör boyutu ≤4 cm (${s} cm)`,
+      n0:'N0 – Lenf nodu metastazı yok', n1aLow:'Santral LN: ≤5 adet, tümü ≤2 mm',
+      m0:'Uzak metastaz yok (M0)', r0:'Negatif cerrahi sınır (R0)',
+      r1ant:'Anterior R1 — düşük risk grubundan dışlamaz',
+      noete:'Ekstratiroid yayılım yok', novi:'Vasküler invazyon yok',
+      noagr:'Agresif histoloji yok', minimal:'Minimal invazif (yalnızca kapsül)',
+      young:a=>`Yaş <55 (${a} yaş) — N durumundan bağımsız AJCC Evre I`,
+    },
+  },
+  en: {
+    hdrH1:'DTC Structural Recurrence Risk — Analysis Engine',
+    hdrSub:'2025 ATA Guidelines · Ringel & Sosa et al. · AJCC/UICC 8th Edition TNM',
+    highRisk:'HIGH RISK', highPct:'Structural Recurrence Risk: >30%',
+    highDesc:'Intensive surveillance and likely RAI therapy with TSH suppression are indicated. Multidisciplinary tumor board review recommended.',
+    ihRisk:'INTERMEDIATE-HIGH RISK', ihPct:'Structural Recurrence Risk: 16-30%',
+    ihDesc:'Individualized surveillance plan required. RAI and TSH suppression should be discussed.',
+    liRisk:'LOW-INTERMEDIATE RISK', liPct:'Structural Recurrence Risk: 10-15%',
+    liDesc:'Moderate intensity follow-up recommended. RAI indication requires individual assessment.',
+    lowRisk:'LOW RISK', lowPct:'Structural Recurrence Risk: <10%',
+    lowDesc:'Routine surveillance is sufficient. RAI is generally not indicated. TSH suppression may not be necessary.',
+    fSize:'Tumor Size', fETE:'ETE', fLN:'LN Status', fVI:'Vasc. Invasion',
+    fM:'Distant Mets', fMargin:'Surgical Margin',
+    ctLabels:{PTC:'Papillary TC (PTC)',FTC:'Follicular TC / IEFVPTC',OTC:'Oncocytic TC (OTC)'},
+    agePill:(a,s)=>`👤 <strong>${a}</strong> yrs · AJCC: <strong>${s}</strong>`,
+    noRisk:'No significant risk-increasing factors identified.',
+    totalLabel:'Total', ageLabel:'Age',
+    typeLabel:'Type', hRisk:'⚠️ Risk-Increasing Factors', hProt:'✅ Low-Risk Criteria Met',
+    raiYesTitle:'RAI Therapy: Indicated',
+    raiYesText:'Per ATA 2025 Table 10, RAI (adjuvant/therapeutic) is recommended after total thyroidectomy in high-risk patients. Dose and preparation should be individualized.',
+    raiWarnTitle:'RAI: Evaluate via Shared Decision-Making',
+    raiWarnText:'In intermediate-high risk, RAI indication should be individually assessed. Histology, imaging, and Tg levels will guide the decision.',
+    raiDiscTitle:'RAI: May Be Considered in Selected Patients',
+    raiDiscText:'RAI indication is debatable in low-intermediate risk. Low-dose RAI (1.1-1.85 GBq) may be considered in selected patients after total thyroidectomy.',
+    raiNoTitle:'RAI: Not Routinely Recommended',
+    raiNoText:'Per ATA 2025, clinical benefit of RAI has not been demonstrated in low-risk disease (ESTIMABL2 trial). Generally unnecessary after lobectomy.',
+    btnAnalyze:'Analyze Risk',
+    rf:{
+      m1:'Distant metastasis (M1)', r2:'Gross incomplete resection (R2)', ene:'Extranodal extension (ENE) — High risk with T3a/T3b/T4 or cN1≥3cm', eneIntHigh:'Extranodal extension (ENE) — Intermediate-high risk with T1/T2',
+      lnbig:b=>`Largest LN ≥3 cm (${b} cm)`,
+      agr:'Aggressive/high-grade histology (incl. PDTC/DHGTC)',
+      strap:'Gross ETE – Strap muscles (T3b)', major:'Gross ETE – Major structures (T4a/T4b)',
+      viext:ct=>`Extensive vascular invasion ≥4 vessels (${ct})`,
+      wide:ct=>`Widely invasive — ${ct}`,
+      bilateral:d=>`Bilateral multifocality, total diameter ${d} cm`,
+      n1b:b=>`Lateral LN metastasis (cN1b) <3 cm (${b>0?b+' cm':'size not entered'})`,
+      viPTC:'Vascular invasion (PTC) — intermediate-high risk',
+      T3a:'T3a (>4 cm, intrathyroidal)', microete:'Microscopic ETE',
+      unimulti:d=>`Unilateral multifocality (total: ${d} cm)`,
+      n1a:(n,big)=>`Central LN (N1a): ${n} nodes${big?', >2 mm':''}`,
+      r1post:'Posterior R1 margin — independent risk factor',
+      vilim:ct=>`Limited vascular invasion <4 vessels (${ct})`,
+      upgrade:'2+ low-intermediate factors → Upgrading to Intermediate-High',
+    },
+    pf:{
+      unifocal:'Unifocal tumor', size:s=>`Tumor ≤4 cm (${s} cm)`,
+      n0:'N0 – No lymph node metastasis', n1aLow:'Central LN: ≤5 nodes, all ≤2 mm',
+      m0:'No distant metastasis (M0)', r0:'Negative surgical margin (R0)',
+      r1ant:'Anterior R1 — does not exclude low-risk group',
+      noete:'No extrathyroidal extension', novi:'No vascular invasion',
+      noagr:'No aggressive histology', minimal:'Minimally invasive (capsule only)',
+      young:a=>`Age <55 (${a} yrs) — AJCC Stage I regardless of N`,
+    },
+  }
+};
+
+let lang = 'tr';
+
+function setLang(l) {
+  lang = l;
+  document.getElementById('lb-tr').className = 'lb'+(l==='tr'?' on':'');
+  document.getElementById('lb-en').className = 'lb'+(l==='en'?' on':'');
+
+  // Apply data-tr / data-en to ALL elements
+  applyDataLang();
+
+  // Header via JS-managed IDs
+  const t = L[l];
+  document.getElementById('hdrH1').textContent = t.hdrH1;
+  document.getElementById('hdrSub').textContent = t.hdrSub;
+
+  // L_ spans (age, sex labels etc.)
+  const idMap = {
+    'L_agr':     l==='tr'?'Agresif Histoloji':'Aggressive Histology',
+    'L_agrhint': l==='tr'?'(Tall cell, Hobnail, Solid, Diff. Sclerosing, PDTC/DHGTC)':'(Tall cell, Hobnail, Solid, Diff. Sclerosing, PDTC/DHGTC)',
+    'L_patient': l==='tr'?'Hasta Bilgileri':'Patient Details',
+    'L_age':     l==='tr'?'Hasta Yaşı':'Patient Age',
+    'L_agehint': l==='tr'?'(AJCC evrelemesi için)':'(for AJCC staging)',
+    'L_sex':     l==='tr'?'Cinsiyet':'Sex',
+  };
+  Object.entries(idMap).forEach(([id,val])=>{
+    const el=document.getElementById(id); if(el) el.textContent=val;
+  });
+
+  // Placeholder input attributes
+  document.getElementById('patientAge').placeholder = l==='tr'?'örn: 52':'e.g.: 52';
+  document.getElementById('tumorSize').placeholder  = l==='tr'?'örn: 2.5':'e.g.: 2.5';
+  document.getElementById('totalSize').placeholder  = l==='tr'?'örn: 3.2':'e.g.: 3.2';
+  document.getElementById('lnSayi').placeholder     = l==='tr'?'adet':'count';
+  document.getElementById('lnBoyut').placeholder    = l==='tr'?'cm':'cm';
+}
+
+// ===== STATE =====
+const S = {
+  ct:'', agresif:null, lokasyon:null, ete:null,
+  vaskuler:null, ftcInv:null, lnloc:null, lnsize:null,
+  ene:null, uzakmet:null, margin:null, cinsiyet:null
+};
+
+const toggleMap = {
+  'agresif':  { keys:['tb-agr-hayir','tb-agr-evet'],      vals:['hayir','evet'] },
+  'lokasyon': { keys:['tb-loc-unifokal','tb-loc-uni-multi','tb-loc-bilateral'], vals:['unifokal','uni-multi','bilateral'] },
+  'ete':      { keys:['tb-ete-yok','tb-ete-mikro','tb-ete-strap','tb-ete-major'], vals:['yok','mikro','strap','major'] },
+  'vaskuler': { keys:['tb-vi-yok','tb-vi-sinirli','tb-vi-kapsamli'],   vals:['yok','sinirli','kapsamli'] },
+  'ftcInv':   { keys:['tb-fi-minimal','tb-fi-genis'],       vals:['minimal','genis'] },
+  'lnloc':    { keys:['tb-ln-N0','tb-ln-N1a','tb-ln-N1b'],  vals:['N0','N1a','N1b'] },
+  'lnsize':   { keys:['tb-lns-kucuk','tb-lns-buyuk'],       vals:['kucuk','buyuk'] },
+  'ene':      { keys:['tb-ene-yok','tb-ene-var'],           vals:['yok','var'] },
+  'uzakmet':  { keys:['tb-m-0','tb-m-1'],                   vals:['M0','M1'] },
+  'margin':   { keys:['tb-mg-R0','tb-mg-R1ant','tb-mg-R1post','tb-mg-R2'], vals:['R0','R1ant','R1post','R2'] },
+  'cinsiyet': { keys:['tb-sex-k','tb-sex-e'], vals:['kadin','erkek'] },
+};
+
+function setT(key, val, style) {
+  S[key] = val;
+  const m = toggleMap[key];
+  if (!m) return;
+  m.keys.forEach(id => { const b=document.getElementById(id); if(b) b.className='toggle-btn'; });
+  const idx = m.vals.indexOf(val);
+  if(idx>=0){
+    const b=document.getElementById(m.keys[idx]);
+    if(b){
+      const cls={safe:'sel-safe',warn:'sel-warn',danger:'sel-danger',neutral:'sel-neutral'}[style]||'';
+      b.className='toggle-btn '+cls;
+    }
+  }
+  const multi=S.lokasyon==='uni-multi'||S.lokasyon==='bilateral';
+  document.getElementById('totalSizeWrap').style.display=multi?'block':'none';
+}
+
+function selectCT(ct) {
+  S.ct=ct;
+  ['PTC','FTC','OTC'].forEach(c=>{
+    document.getElementById('ctb-'+c).className='ct-btn'+(c===ct?' active-'+c.toLowerCase():'');
+  });
+  document.getElementById('ftcInvField').style.display=(ct==='FTC'||ct==='OTC')?'block':'none';
+  applyTheme(ct);
+}
+
+function applyTheme(ct){
+  const t=ct?'theme-'+ct.toLowerCase():'theme-default';
+  ['headerIcon','headerBadge','analyzeBtn'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.className=el.className.replace(/theme-\w+/,'')+' '+t;
+  });
+  document.querySelectorAll('.sl-dot').forEach(d=>{
+    d.className='sl-dot '+(ct==='PTC'?'sl-ptc':ct==='FTC'?'sl-ftc':ct==='OTC'?'sl-otc':'sl-gray');
+  });
+}
+
+function analyzeRisk() {
+  if (!S.ct) { alert(lang==='tr'?'Lütfen kanser tipini seçiniz.':'Please select the cancer type.'); return; }
+  const t = L[lang];
+
+  const age       = parseInt(document.getElementById('patientAge').value)||null;
+  const tumorSize = parseFloat(document.getElementById('tumorSize').value)||0;
+  const totalSize = parseFloat(document.getElementById('totalSize').value)||tumorSize;
+  const lnSayi    = parseInt(document.getElementById('lnSayi').value)||0;
+  const lnBoyut   = parseFloat(document.getElementById('lnBoyut').value)||0;
+  const ct=S.ct, ete=S.ete;
+
+  // T STAGE
+  let tStage = '?';
+  if(ete==='major')      tStage='T4a/T4b';
+  else if(ete==='strap') tStage='T3b';
+  else if(tumorSize>4)    tStage='T3a';
+  else if(tumorSize>2)    tStage='T2';
+  else if(tumorSize>1)    tStage='T1b';
+  else if(tumorSize>0)    tStage='T1a';
+
+  const nStage=S.lnloc||'N0';
+  const mStage=S.uzakmet||'M0';
+
+  // AJCC 8th — precise with age
+  let ajccStage='';
+  if(age!==null){
+    if(age<55){
+      ajccStage=mStage==='M1'?'Stage II':'Stage I';
+    } else {
+      if(mStage==='M1')                        ajccStage='Stage IVB';
+      else if(tStage.includes('T4b'))          ajccStage='Stage IVA';
+      else if(tStage==='T4a/T4b')             ajccStage='Stage III';
+      else if(tStage==='T3a'||tStage==='T3b') ajccStage='Stage II';
+      else if(nStage==='N1a'||nStage==='N1b') ajccStage='Stage II';
+      else                                      ajccStage='Stage I';
+    }
+  } else {
+    if(mStage==='M1')                        ajccStage='IVB(≥55)/II(<55)';
+    else if(tStage.includes('T4'))           ajccStage='III-IVA(≥55)/I(<55)';
+    else if(tStage==='T3a'||tStage==='T3b') ajccStage='II(≥55)/I(<55)';
+    else if(nStage==='N1a'||nStage==='N1b') ajccStage='II(≥55)/I(<55)';
+    else                                      ajccStage='Stage I';
+  }
+
+  // RISK FACTORS
+  let isHigh=false,isIntHigh=false,isLowInt=false;
+  const hF=[],mF=[],lF=[],pF=[];
+  const rf=t.rf, pf=t.pf;
+
+  if(mStage==='M1')            {isHigh=true;hF.push({t:rf.m1,d:'fd-red'});}
+  if(S.margin==='R2')          {isHigh=true;hF.push({t:rf.r2,d:'fd-red'});}
+  // ENE: ATA 2025 - HIGH risk için ENE'nin T3a/T3b/T4 VEYA cN1≥3cm ile birlikte olması gerekir
+  // T1/T2 ile yalnız ENE → INT-HIGH (orta-yüksek)
+  if(S.ene==='var'){
+    const eneHighT = (tStage==='T3a'||tStage==='T3b'||tStage==='T4a/T4b');
+    const eneHighN = (lnBoyut>=3&&nStage!=='N0');
+    if(eneHighT||eneHighN){
+      isHigh=true; hF.push({t:rf.ene,d:'fd-red'});
+    } else {
+      // T1/T2 + ENE → INT-HIGH
+      isIntHigh=true; mF.push({t:rf.eneIntHigh,d:'fd-orange'});
+    }
+  }
+  if(lnBoyut>=3&&nStage!=='N0'){isHigh=true;hF.push({t:rf.lnbig(lnBoyut),d:'fd-red'});}
+  if(S.agresif==='evet')       {isHigh=true;hF.push({t:rf.agr,d:'fd-red'});}
+  if(ete==='strap')            {isHigh=true;hF.push({t:rf.strap,d:'fd-red'});}
+  if(ete==='major')            {isHigh=true;hF.push({t:rf.major,d:'fd-red'});}
+  if((ct==='FTC'||ct==='OTC')&&S.vaskuler==='kapsamli'){isHigh=true;hF.push({t:rf.viext(ct),d:'fd-red'});}
+  if((ct==='FTC'||ct==='OTC')&&S.ftcInv==='genis')     {isHigh=true;hF.push({t:rf.wide(ct),d:'fd-red'});}
+
+  if(!isHigh){
+    if(S.lokasyon==='bilateral'&&totalSize>1){isIntHigh=true;mF.push({t:rf.bilateral(totalSize),d:'fd-orange'});}
+    if(nStage==='N1b'&&lnBoyut<3){isIntHigh=true;mF.push({t:rf.n1b(lnBoyut),d:'fd-orange'});}
+    if(ct==='PTC'&&(S.vaskuler==='sinirli'||S.vaskuler==='kapsamli')){isIntHigh=true;mF.push({t:rf.viPTC,d:'fd-orange'});}
+  }
+  if(!isHigh){
+    if(tStage==='T3a') {isLowInt=true;lF.push({t:rf.T3a,d:'fd-yellow'});}
+    if(ete==='mikro')  {isLowInt=true;lF.push({t:rf.microete,d:'fd-yellow'});}
+    if(S.lokasyon==='uni-multi'&&!isIntHigh){isLowInt=true;lF.push({t:rf.unimulti(totalSize),d:'fd-yellow'});}
+    if(nStage==='N1a'&&(S.lnsize==='buyuk'||lnSayi>5)){isLowInt=true;lF.push({t:rf.n1a(lnSayi,S.lnsize==='buyuk'),d:'fd-yellow'});}
+    if(S.margin==='R1post'){isLowInt=true;lF.push({t:rf.r1post,d:'fd-yellow'});}
+    if((ct==='FTC'||ct==='OTC')&&S.vaskuler==='sinirli'){isLowInt=true;lF.push({t:rf.vilim(ct),d:'fd-yellow'});}
+    if(lF.length>=2&&!isIntHigh){isIntHigh=true;mF.push({t:rf.upgrade,d:'fd-orange'});}
+  }
+
+  if(S.lokasyon==='unifokal')          pF.push({t:pf.unifocal,d:'fd-green'});
+  if(tumorSize>0&&tumorSize<=4)          pF.push({t:pf.size(tumorSize),d:'fd-green'});
+  if(nStage==='N0')                    pF.push({t:pf.n0,d:'fd-green'});
+  if(nStage==='N1a'&&S.lnsize==='kucuk'&&lnSayi<=5) pF.push({t:pf.n1aLow,d:'fd-green'});
+  if(mStage==='M0')                    pF.push({t:pf.m0,d:'fd-green'});
+  if(S.margin==='R0')                  pF.push({t:pf.r0,d:'fd-green'});
+  if(S.margin==='R1ant')               pF.push({t:pf.r1ant,d:'fd-green'});
+  if(ete==='yok')                      pF.push({t:pf.noete,d:'fd-green'});
+  if(S.vaskuler==='yok')              pF.push({t:pf.novi,d:'fd-green'});
+  if(S.agresif==='hayir')             pF.push({t:pf.noagr,d:'fd-green'});
+  if((ct==='FTC'||ct==='OTC')&&S.ftcInv==='minimal') pF.push({t:pf.minimal,d:'fd-green'});
+  if(age!==null&&age<55) pF.push({t:pf.young(age),d:'fd-green'});
+
+  let lvl,rTitle,rPct,rDesc,rCls,rEmoji,gWidth,gCls;
+  if(isHigh)       {lvl='HIGH'; rTitle=t.highRisk;rPct=t.highPct;rDesc=t.highDesc;rCls='rl-high';   rEmoji='🔴';gWidth='92%';gCls='gf-high';}
+  else if(isIntHigh){lvl='IH';  rTitle=t.ihRisk;  rPct=t.ihPct;  rDesc=t.ihDesc;  rCls='rl-inthigh';rEmoji='🟠';gWidth='65%';gCls='gf-inthigh';}
+  else if(isLowInt) {lvl='LI';  rTitle=t.liRisk;  rPct=t.liPct;  rDesc=t.liDesc;  rCls='rl-lowint'; rEmoji='🟡';gWidth='35%';gCls='gf-lowint';}
+  else              {lvl='LOW'; rTitle=t.lowRisk; rPct=t.lowPct; rDesc=t.lowDesc; rCls='rl-low';    rEmoji='🟢';gWidth='12%';gCls='gf-low';}
+
+  let raiHtml='';
+  if(lvl==='HIGH') raiHtml=`<div class="rai-card rai-yes"><div class="rai-icon-lrg">☢️</div><div class="rai-content"><h4>${t.raiYesTitle}</h4><p>${t.raiYesText}</p></div></div>`;
+  else if(lvl==='IH') raiHtml=`<div class="rai-card rai-discuss"><div class="rai-icon-lrg">⚕️</div><div class="rai-content"><h4>${t.raiWarnTitle}</h4><p>${t.raiWarnText}</p></div></div>`;
+  else if(lvl==='LI') raiHtml=`<div class="rai-card rai-discuss"><div class="rai-icon-lrg">🔍</div><div class="rai-content"><h4>${t.raiDiscTitle}</h4><p>${t.raiDiscText}</p></div></div>`;
+  else raiHtml=`<div class="rai-card rai-no"><div class="rai-icon-lrg">✅</div><div class="rai-content"><h4>${t.raiNoTitle}</h4><p>${t.raiNoText}</p></div></div>`;
+
+  // RENDER
+  const ctl=ct.toLowerCase();
+  const ctIcon={PTC:'🔵',FTC:'🟣',OTC:'🩵'}[ct];
+  document.getElementById('ctPill').className=`ct-pill theme-${ctl}`;
+  document.getElementById('ctPill').innerHTML=`${ctIcon} ${t.ctLabels[ct]}`;
+
+  const ap=document.getElementById('agePill');
+  if(age!==null){ap.style.display='inline-flex';ap.innerHTML=t.agePill(age,ajccStage);}
+  else ap.style.display='none';
+
+  document.getElementById('placeholder').style.display='none';
+  document.getElementById('rc').className='result-container show';
+
+  const banner=document.getElementById('riskBanner');
+  banner.className=`risk-banner ${rCls} themed-border-${ctl}`;
+  document.getElementById('riskEmoji').textContent=rEmoji;
+  document.getElementById('riskTitle').textContent=rTitle;
+  document.getElementById('riskPct').textContent=rPct;
+  document.getElementById('riskDesc').textContent=rDesc;
+
+  const gf=document.getElementById('gaugeFill');
+  gf.className=`gauge-fill ${gCls}`;
+  setTimeout(()=>{gf.style.width=gWidth;},60);
+
+  // Update section card headings
+  const sr=document.getElementById('scRisk');
+  if(sr){const h=sr.querySelector('h3');if(h)h.textContent=t.hRisk;}
+
+  const bvc='bv-'+ctl;
+  const multiExtra=totalSize>tumorSize&&tumorSize>0
+    ?`<div class="tnm-badge ${bvc}"><span class="badge-label">${t.totalLabel}</span><span class="badge-value" style="font-size:.82rem">${totalSize} cm</span></div>`:''  ;
+  const ageExtra=age!==null
+    ?`<div class="tnm-badge ${bvc}"><span class="badge-label">${t.ageLabel}</span><span class="badge-value">${age}</span></div>`:'';
+  document.getElementById('badgeRow').innerHTML=`
+    <div class="info-badge"><span class="badge-label">${t.typeLabel}</span><span class="badge-value">${ct}</span></div>
+    <div class="info-badge"><span class="badge-label">T</span><span class="badge-value">${tStage}</span></div>
+    <div class="info-badge"><span class="badge-label">N</span><span class="badge-value">${nStage}</span></div>
+    <div class="info-badge"><span class="badge-label">M</span><span class="badge-value">${mStage}</span></div>
+    <div class="info-badge"><span class="badge-label">AJCC</span><span class="badge-value" style="font-size:.82rem">${ajccStage}</span></div>
+    ${multiExtra}${ageExtra}
+  `;
+
+  const multiStr=totalSize>tumorSize&&tumorSize>0?` (${t.totalLabel}: ${totalSize} cm)`:'';
+  const fcData=[
+    {nm:t.fSize,vl:tumorSize?`${tumorSize} cm${multiStr}`:'-',
+     im:tumorSize>4?'T3a → risk↑':tumorSize>2?'T2':tumorSize>0?'T1':'-',
+     cl:tumorSize>4?'contrib-high':tumorSize>2?'contrib-medium':'contrib-low'},
+    {nm:t.fETE,vl:ete==='yok'?(lang==='tr'?'Yok':'None'):ete==='mikro'?(lang==='tr'?'Mikroskopik':'Microscopic'):ete==='strap'?'Strap (T3b)':'Major (T4)',
+     im:ete==='yok'?(lang==='tr'?'Risk faktörü yok':'No risk'):ete==='mikro'?(lang==='tr'?'Düşük-orta':'Low-int'):(lang==='tr'?'Yüksek':'High'),
+     cl:ete==='yok'?'contrib-low':ete==='mikro'?'contrib-medium':'contrib-high'},
+    {nm:t.fLN,vl:`${nStage}${lnSayi>0?' — '+lnSayi:''} ${lnBoyut>0?lnBoyut+' cm':''}`,
+     im:S.ene==='var'?'ENE':nStage==='N1b'?'Lateral LN↑':nStage==='N1a'?(lang==='tr'?'Santral':'Central'):'N0',
+     cl:S.ene==='var'?((tStage==='T3a'||tStage==='T3b'||tStage==='T4a/T4b'||lnBoyut>=3)?'contrib-high':'contrib-medium'):nStage==='N1b'?'contrib-medium':nStage==='N1a'?'contrib-medium':'contrib-low'},
+    {nm:t.fVI,vl:S.vaskuler==='yok'?(lang==='tr'?'Yok':'None'):S.vaskuler==='sinirli'?(lang==='tr'?'Sınırlı <4':'Limited <4'):S.vaskuler==='kapsamli'?(lang==='tr'?'Kapsamlı ≥4':'Extensive ≥4'):'-',
+     im:S.vaskuler==='kapsamli'?(lang==='tr'?'Yüksek (FTC/OTC)':'High (FTC/OTC)'):S.vaskuler==='sinirli'?(lang==='tr'?'Orta':'Mod.'):(lang==='tr'?'Yok':'None'),
+     cl:S.vaskuler==='kapsamli'?'contrib-high':S.vaskuler==='sinirli'?'contrib-medium':'contrib-low'},
+    {nm:t.fM,vl:mStage,
+     im:mStage==='M1'?(lang==='tr'?'Mutlak yüksek':'Absolute high'):(lang==='tr'?'Yok':'None'),
+     cl:mStage==='M1'?'contrib-high':'contrib-low'},
+    {nm:t.fMargin,vl:S.margin||'-',
+     im:S.margin==='R2'?(lang==='tr'?'Yüksek':'High'):S.margin==='R1post'?(lang==='tr'?'Bağımsız risk':'Indep. risk'):S.margin==='R0'?(lang==='tr'?'Negatif':'Negative'):'-',
+     cl:S.margin==='R2'?'contrib-high':S.margin==='R1post'?'contrib-medium':'contrib-low'},
+  ];
+  const fg=document.getElementById('factorsGrid');
+  fg.innerHTML=fcData.map(f=>`<div class="factor-card ${f.cl}"><div class="factor-name">${f.nm}</div><div class="factor-value">${f.vl}</div><div class="factor-impact">${f.im}</div></div>`).join('');
+
+  const rl=document.getElementById('riskList');
+  const allR=[...hF,...mF,...lF];
+  rl.innerHTML=allR.length===0
+    ?`<li><span class="fi-dot green"></span>${t.noRisk}</li>`
+    :allR.map(f=>`<li><span class="fi-dot ${f.d}"></span><span>${f.t}</span></li>`).join('');
+
+  if(pF.length>0){
+    document.getElementById('scProt').style.display='block';
+    document.getElementById('protList').innerHTML=pF.map(f=>`<li><span class="fi-dot ${f.d}"></span><span>${f.t}</span></li>`).join('');
+  } else document.getElementById('scProt').style.display='none';
+
+  document.getElementById('raiDiv').innerHTML=raiHtml;
+
+  
+
+  if(window.innerWidth<900) document.querySelector('.results-panel').scrollIntoView({behavior:'smooth'});
+}
+
+function toggleTNM() {
+  const panel = document.getElementById('tnmPanel');
+  const arrow = document.getElementById('tnmArrow');
+  const open = panel.style.display === 'none' || panel.style.display === '';
+  panel.style.display = open ? 'flex' : 'none';
+  arrow.textContent = open ? '▲' : '▼';
+  // Apply current lang to newly visible panel
+  applyDataLang();
+}
+
+function toggleCat(id) {
+  const body = document.getElementById(id);
+  const arrId = id.replace('cat','arr');
+  const arrow = document.getElementById(arrId);
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  if (arrow) arrow.classList.toggle('open', !isOpen);
+}
+
+function applyDataLang() {
+  document.querySelectorAll('[data-tr]').forEach(el => {
+    const val = lang === 'en' ? (el.getAttribute('data-en') || el.getAttribute('data-tr')) : el.getAttribute('data-tr');
+    if (val) el.innerHTML = val;
+  });
+}
+
+function resetForm() {
+  Object.keys(S).forEach(k=>S[k]=null); S.ct='';
+  document.querySelectorAll('.toggle-btn').forEach(b=>b.className='toggle-btn');
+  ['ctb-PTC','ctb-FTC','ctb-OTC'].forEach(id=>document.getElementById(id).className='ct-btn');
+  ['tumorSize','totalSize','lnSayi','lnBoyut','patientAge'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('ftcInvField').style.display='none';
+  document.getElementById('totalSizeWrap').style.display='none';
+  document.getElementById('placeholder').style.display='flex';
+  document.getElementById('rc').classList.remove('show');
+  document.getElementById('gaugeFill').style.width='0%';
+  const ap=document.getElementById('agePill');
+  if(ap) ap.style.display='none';
+  applyTheme('');
+}
+
+/* ══ NÜKS ACCORDION ══ */
+function toggleNuksAccordion() {
+  var wrap = document.getElementById('nuksAccordion');
+  wrap.classList.toggle('open');
+}
+
+function toggle(card){card.classList.toggle("open");}
+</script>
+
+</body>
+</html>
