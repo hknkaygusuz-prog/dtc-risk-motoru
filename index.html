@@ -3207,10 +3207,10 @@ function generateFullReport(){
   }
   
   const dl=lang||'tr';
-  const riskLabel={'LOW':D.riskLow[dl],'LI':D.riskLI[dl],'IH':D.riskIH[dl],'HIGH':D.riskHigh[dl]};
-  const cancerLabel={'PTC':D.cancerPTC[dl],'FTC':D.cancerFTC[dl],'OTC':D.cancerOTC[dl]};
-  const txLabel={'tt_rai':D.txTtRai[dl],'tt_norai':D.txTtNorai[dl],'lobektomi':D.txLob[dl]};
-  const responseLabels={excellent:D.respExcellent[dl],indeterminate:D.respIndeterminate[dl],biochemical:D.respBiochemical[dl],structural:D.respStructural[dl]};
+  const riskLabel={'LOW':D.riskLabels.LOW[dl],'LI':D.riskLabels.LI[dl],'IH':D.riskLabels.IH[dl],'HIGH':D.riskLabels.HIGH[dl]};
+  const cancerLabel={'PTC':{tr:'Papiller TK (PTC)',en:'Papillary TC (PTC)',de:'Papilläres SK (PTC)',es:'CT Papilar (PTC)',it:'CT Papillare (PTC)'}[dl],'FTC':{tr:'Foliküler TK (FTC)',en:'Follicular TC (FTC)',de:'Follikuläres SK (FTC)',es:'CT Folicular (FTC)',it:'CT Follicolare (FTC)'}[dl],'OTC':{tr:'Onkositik TK (OTC)',en:'Oncocytic TC (OTC)',de:'Onkozytäres SK (OTC)',es:'CT Oncocítico (OTC)',it:'CT Oncocitario (OTC)'}[dl]};
+  const txLabel={'tt_rai':{tr:'Total Tiroidektomi + RAI',en:'Total Thyroidectomy + RAI',de:'Totale Thyreoidektomie + RJT',es:'Tiroidectomía Total + RAI',it:'Tiroidectomia Totale + RAI'}[dl],'tt_norai':{tr:'Total Tiroidektomi (RAI yok)',en:'Total Thyroidectomy (no RAI)',de:'Totale Thyreoidektomie (ohne RJT)',es:'Tiroidectomía Total (sin RAI)',it:'Tiroidectomia Totale (senza RAI)'}[dl],'lobektomi':{tr:'Lobektomi',en:'Lobectomy',de:'Lobektomie',es:'Lobectomía',it:'Lobectomia'}[dl]};
+  const responseLabels={excellent:D.excellent[dl],indeterminate:D.indeterminate[dl],biochemical:D.biochemical[dl],structural:D.structural[dl]};
   const responseColors={excellent:'rp-resp-exc',indeterminate:'rp-resp-ind',biochemical:'rp-resp-bio',structural:'rp-resp-str'};
   
   const now=new Date();
@@ -3244,7 +3244,7 @@ function generateFullReport(){
   let rightTopHtml=`
     <div class="rp-card">
       <div class="rp-card-title">${{tr:'Klinik Bilgiler',en:'Clinical Information',de:'Klinische Informationen',es:'Información Clínica',it:'Informazioni Cliniche'}[dl]}</div>
-      <div class="rp-kv"><span class="rp-k">${D.cancerType[dl]}</span><span class="rp-v">${cancerLabel[cancer]}</span></div>
+      <div class="rp-kv"><span class="rp-k">${{tr:'Kanser Tipi',en:'Cancer Type',de:'Krebsart',es:'Tipo de Cáncer',it:'Tipo di Cancro'}[dl]}</span><span class="rp-v">${cancerLabel[cancer]}</span></div>
       <div class="rp-kv"><span class="rp-k">${D.riskGroup[dl]}</span><span class="rp-v rp-bold">${riskLabel[lvl]}</span></div>
       ${tnmLine}${ajccLine}
     </div>`;
@@ -3255,11 +3255,11 @@ function generateFullReport(){
     const tx=dynState.tx||'tt_rai';
     const tg=document.getElementById('dynTg').value||'-';
     const stimTg=document.getElementById('dynStimTg').value||'-';
-    const tgabLabels={'negatif':D.tgabNeg[dl],'stabil':D.tgabStable[dl],'yukseliyor':D.tgabRising[dl]};
+    const tgabLabels={'negatif':{tr:'Negatif',en:'Negative',de:'Negativ',es:'Negativo',it:'Negativo'}[dl],'stabil':{tr:'Stabil',en:'Stable',de:'Stabil',es:'Estable',it:'Stabile'}[dl],'yukseliyor':{tr:'Yükseliyor',en:'Rising',de:'Steigend',es:'En aumento',it:'In aumento'}[dl]};
     const tgab=tgabLabels[dynState.tgab]||'-';
-    const trendLabels={'dusuyor':D.trendDecreasing[dl],'stabil':D.trendStable[dl],'yukseliyor':D.trendRising[dl]};
+    const trendLabels={'dusuyor':{tr:'Düşüyor',en:'Decreasing',de:'Sinkend',es:'Disminuyendo',it:'In diminuzione'}[dl],'stabil':D.trendStable[dl],'yukseliyor':{tr:'Yükseliyor',en:'Rising',de:'Steigend',es:'En aumento',it:'In aumento'}[dl]};
     const tgTrend=trendLabels[dynState.tgTrend]||'-';
-    const usgLabels={'normal':D.usgNormal[dl],'nonspesifik':D.usgNonspec[dl],'supheli':D.usgSusp[dl]};
+    const usgLabels={'normal':{tr:'Normal',en:'Normal',de:'Normal',es:'Normal',it:'Normale'}[dl],'nonspesifik':{tr:'Nonspesifik',en:'Nonspecific',de:'Unspezifisch',es:'Inespecífico',it:'Aspecifico'}[dl],'supheli':{tr:'Şüpheli',en:'Suspicious',de:'Verdächtig',es:'Sospechoso',it:'Sospetto'}[dl]};
     const usg=usgLabels[dynState.usg]||'-';
     const responseType=window._lastDynResult.responseType||'excellent';
     const responseLabel=responseLabels[responseType]||'-';
@@ -3311,12 +3311,12 @@ function generateFullReport(){
     midLeftHtml=`
     <div class="rp-card">
       <div class="rp-card-title">${{tr:'Tedavi & Laboratuvar',en:'Treatment & Laboratory',de:'Behandlung & Labor',es:'Tratamiento & Laboratorio',it:'Trattamento & Laboratorio'}[dl]}</div>
-      <div class="rp-kv"><span class="rp-k">${D.txType[dl]}</span><span class="rp-v">${txLabel[tx]}</span></div>
-      <div class="rp-kv"><span class="rp-k">${D.unstimTg[dl]}</span><span class="rp-v rp-bold">${tg} ng/mL</span></div>
-      ${stimTg!=='-'?'<div class="rp-kv"><span class="rp-k">'+D.stimTg[dl]+'</span><span class="rp-v">'+stimTg+' ng/mL</span></div>':''}
+      <div class="rp-kv"><span class="rp-k">${{tr:'Tedavi Tipi',en:'Treatment Type',de:'Behandlungsart',es:'Tipo de Tratamiento',it:'Tipo di Trattamento'}[dl]}</span><span class="rp-v">${txLabel[tx]}</span></div>
+      <div class="rp-kv"><span class="rp-k">${{tr:'Unstimüle Tg',en:'Unstimulated Tg',de:'Unstimuliertes Tg',es:'Tg No Estimulada',it:'Tg Non Stimolata'}[dl]}</span><span class="rp-v rp-bold">${tg} ng/mL</span></div>
+      ${stimTg!=='-'?`<div class="rp-kv"><span class="rp-k">${{tr:'Stimüle Tg',en:'Stimulated Tg',de:'Stimuliertes Tg',es:'Tg Estimulada',it:'Tg Stimolata'}[dl]}</span><span class="rp-v">${stimTg} ng/mL</span></div>`:''}
       <div class="rp-kv"><span class="rp-k">TgAb</span><span class="rp-v">${tgab}</span></div>
-      <div class="rp-kv"><span class="rp-k">${D.tgTrend[dl]}</span><span class="rp-v">${tgTrend}</span></div>
-      <div class="rp-kv"><span class="rp-k">${D.neckUSG[dl]}</span><span class="rp-v">${usg}</span></div>
+      <div class="rp-kv"><span class="rp-k">${{tr:'Tg Trendi',en:'Tg Trend',de:'Tg-Trend',es:'Tendencia Tg',it:'Trend Tg'}[dl]}</span><span class="rp-v">${tgTrend}</span></div>
+      <div class="rp-kv"><span class="rp-k">${{tr:'Boyun USG',en:'Neck US',de:'Hals-US',es:'US Cervical',it:'US Collo'}[dl]}</span><span class="rp-v">${usg}</span></div>
       ${tshCurrentLine}
     </div>`;
     
@@ -3337,7 +3337,7 @@ function generateFullReport(){
         <div class="rp-mt-row"><span>${{tr:'Doz',en:'Dose',de:'Dosis',es:'Dosis',it:'Dose'}[dl]}</span><span>${rai.doz}</span></div>
       </div>
       <div class="rp-mini-table" style="margin-top:8px">
-        <div class="rp-mt-row rp-mt-header"><span>${D.followUp[dl]}</span><span>${{tr:'Süre',en:'Duration',de:'Dauer',es:'Duración',it:'Durata'}[dl]}</span></div>
+        <div class="rp-mt-row rp-mt-header"><span>${{tr:'Takip',en:'Follow-Up',de:'Nachsorge',es:'Seguimiento',it:'Follow-Up'}[dl]}</span><span>${{tr:'Süre',en:'Duration',de:'Dauer',es:'Duración',it:'Durata'}[dl]}</span></div>
         <div class="rp-mt-row"><span>${{tr:'İlk USG',en:'First US',de:'Erste US',es:'Primera US',it:'Prima US'}[dl]}</span><span>${ut.ilk} ${{tr:'sonra',en:'later',de:'später',es:'después',it:'dopo'}[dl]}</span></div>
         <div class="rp-mt-row"><span>${{tr:'USG Aralığı',en:'US Interval',de:'US-Intervall',es:'Intervalo US',it:'Intervallo US'}[dl]}</span><span>${ut.aralik}</span></div>
         <div class="rp-mt-row"><span>${{tr:'Tg Takibi',en:'Tg Monitoring',de:'Tg-Überwachung',es:'Monitoreo Tg',it:'Monitoraggio Tg'}[dl]}</span><span>${{tr:'Her 6-12 ayda',en:'Every 6-12 months',de:'Alle 6-12 Monate',es:'Cada 6-12 meses',it:'Ogni 6-12 mesi'}[dl]}</span></div>
