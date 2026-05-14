@@ -3416,12 +3416,25 @@ function submitIssue(){
     return;
   }
   
-  // Sorun verisini konsola logla (gerçek uygulamada API'ye gönderilir)
-  const issueData={name,email,type,description:desc,steps,timestamp:new Date().toISOString(),lang:lang,userAgent:navigator.userAgent};
-  console.log('Issue reported:',issueData);
+  // GitHub Issues'a yönlendir
+  const typeLabels={bug:'Bug',feature:'Feature Request',calculation:'Calculation Error',ui:'UI Issue',other:'Other'};
+  const issueTitle=encodeURIComponent('['+typeLabels[type]+'] '+desc.substring(0,80));
+  let issueBody='';
+  issueBody+='## Sorun Açıklaması\n'+desc+'\n\n';
+  if(steps) issueBody+='## Adımlar\n'+steps+'\n\n';
+  issueBody+='## Bilgiler\n';
+  if(name) issueBody+='- **Bildiren:** '+name+'\n';
+  if(email) issueBody+='- **E-posta:** '+email+'\n';
+  issueBody+='- **Tür:** '+typeLabels[type]+'\n';
+  issueBody+='- **Dil:** '+lang+'\n';
+  issueBody+='- **Tarih:** '+new Date().toLocaleString()+'\n';
+  issueBody+='- **Tarayıcı:** '+navigator.userAgent+'\n';
+  const encodedBody=encodeURIComponent(issueBody);
+  const githubUrl='https://github.com/hknkaygusuz-prog/dtc-risk-motoru/issues/new?title='+issueTitle+'&body='+encodedBody+'&labels='+encodeURIComponent(typeLabels[type]);
+  window.open(githubUrl,'_blank');
   
   // Başarı mesajı göster - dile göre
-  const successMsgs={tr:'✅ Geri bildiriminiz için teşekkürler! En kısa sürede ilgili düzeltme yapılacaktır.',en:'✅ Thank you for your feedback! The relevant fix will be implemented as soon as possible.',de:'✅ Vielen Dank für Ihr Feedback! Die entsprechende Korrektur wird so schnell wie möglich durchgeführt.',es:'✅ ¡Gracias por su comentario! La corrección correspondiente se realizará lo antes posible.',it:'✅ Grazie per il vostro feedback! La correzione pertinente verrà implementata il prima possibile.'};
+  const successMsgs={tr:'✅ GitHub Issues sayfası açıldı. Lütfen "Submit new issue" butonuna tıklayarak gönderinizi tamamlayın.',en:'✅ GitHub Issues page opened. Please click "Submit new issue" to complete your report.',de:'✅ GitHub Issues-Seite geöffnet. Bitte klicken Sie auf "Submit new issue", um Ihren Bericht abzuschließen.',es:'✅ Se abrió la página de GitHub Issues. Haga clic en "Submit new issue" para completar su informe.',it:'✅ Pagina GitHub Issues aperta. Fare clic su "Submit new issue" per completare la segnalazione.'};
   document.getElementById('issSuccessMsg').textContent=successMsgs[lang]||successMsgs['en'];
   const resultEl=document.getElementById('issResult');
   resultEl.style.display='block';
