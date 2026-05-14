@@ -25,6 +25,17 @@
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="DTC Risk Stratifikasyon Motoru — ATA 2025">
 <meta name="twitter:description" content="Diferansiye Tiroid Kanseri için ATA 2025 kılavuzuna dayalı risk stratifikasyon motoru. 5 dilde kullanılabilir.">
+<!-- Hreflang - Çok dilli SEO -->
+<link rel="alternate" hreflang="tr" href="https://dtcrisk.com/?lang=tr">
+<link rel="alternate" hreflang="en" href="https://dtcrisk.com/?lang=en">
+<link rel="alternate" hreflang="de" href="https://dtcrisk.com/?lang=de">
+<link rel="alternate" hreflang="es" href="https://dtcrisk.com/?lang=es">
+<link rel="alternate" hreflang="it" href="https://dtcrisk.com/?lang=it">
+<link rel="alternate" hreflang="x-default" href="https://dtcrisk.com/">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:locale:alternate" content="de_DE">
+<meta property="og:locale:alternate" content="es_ES">
+<meta property="og:locale:alternate" content="it_IT">
 <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -1835,6 +1846,7 @@ body {
 <div class="report-page-layout">
   <h2 id="rpTitle">📄 PDF Rapor Oluştur</h2>
   <p class="rp-desc" id="rpDesc">Hasta ve hekim bilgilerini girerek detaylı risk stratifikasyon raporu oluşturun.</p>
+  <p class="rp-optional-note" id="rpOptionalNote" style="font-size:12px;color:#64748b;margin:4px 0 0 0;font-style:italic;">Aşağıdaki alanların doldurulması zorunlu değildir. Bilgi girilmeksizin de rapor oluşturulabilir.</p>
   
   <div class="report-info-form">
     <div class="rp-field">
@@ -1858,6 +1870,14 @@ body {
   <button class="report-generate-btn" onclick="generateFullReport()">
     <span id="rpGenerateBtn">📄 Rapor Oluştur</span>
   </button>
+  
+  <div id="rpPrivacyNotice" style="margin:16px 0;padding:14px 18px;background:linear-gradient(135deg,#f0fdf4,#ecfdf5);border:1px solid #86efac;border-radius:10px;display:flex;align-items:flex-start;gap:10px;">
+    <span style="font-size:18px;flex-shrink:0;">🔒</span>
+    <div>
+      <p id="rpPrivacyTitle" style="font-size:13px;font-weight:700;color:#166534;margin:0 0 4px 0;">Veri Gizliliği ve Güvenlik Bildirimi</p>
+      <p id="rpPrivacyText" style="font-size:11.5px;color:#15803d;margin:0;line-height:1.5;">dtcrisk.com, girilen hiçbir kişisel veriyi depolamamakta, kayıt altına almamakta veya üçüncü taraflarla paylaşmamaktadır. Tüm hesaplamalar ve rapor oluşturma işlemleri yalnızca kullanıcının tarayıcısında (istemci tarafında) gerçekleştirilmekte olup, herhangi bir veri sunucuya iletilmemektedir. Oturum sonlandırıldığında girilen tüm bilgiler otomatik olarak silinmektedir.</p>
+    </div>
+  </div>
   
   <div id="rpReportOutput">
     <div class="report-empty">
@@ -2122,7 +2142,23 @@ const L = {
   }
 };
 
-let lang = 'tr';
+// URL parametresinden dil oku (?lang=en, ?lang=de vb.)
+const _urlLang = new URLSearchParams(window.location.search).get('lang');
+const _validLangs = ['tr','en','de','es','it'];
+let lang = (_urlLang && _validLangs.includes(_urlLang)) ? _urlLang : 'tr';
+// Sayfa yüklendiğinde URL'deki dili uygula
+if(lang !== 'tr') {
+  window.addEventListener('DOMContentLoaded', () => { setLang(lang); });
+} else {
+  // Tarayıcı dilini kontrol et (URL parametresi yoksa)
+  if(!_urlLang) {
+    const _bLang = (navigator.language || navigator.userLanguage || 'tr').substring(0,2).toLowerCase();
+    if(_validLangs.includes(_bLang) && _bLang !== 'tr') {
+      lang = _bLang;
+      window.addEventListener('DOMContentLoaded', () => { setLang(lang); });
+    }
+  }
+}
 
 // ===== MULTI-LANG UI TEXTS (Sayfa 2, 3, 4 için) =====
 const UI = {
@@ -2188,6 +2224,9 @@ const UI = {
   rpInstitution:{tr:'Kurum Adı',en:'Institution',de:'Einrichtung',es:'Institución',it:'Istituzione'},
   rpGenerate:{tr:'📄 Rapor Oluştur',en:'📄 Generate Report',de:'📄 Bericht erstellen',es:'📄 Generar Informe',it:'📄 Genera Report'},
   rpEmpty:{tr:'Rapor oluşturmak için önce <strong>Yapısal Risk Analizi</strong> ve/veya <strong>Uzun Dönem Takip</strong> sekmelerinden hesaplama yapın.',en:'Please perform calculations in <strong>Structural Risk Analysis</strong> and/or <strong>Long-Term Follow-Up</strong> tabs first.',de:'Bitte führen Sie zuerst Berechnungen in <strong>Strukturelle Risikoanalyse</strong> und/oder <strong>Langzeit-Nachsorge</strong> durch.',es:'Primero realice cálculos en <strong>Análisis de Riesgo Estructural</strong> y/o <strong>Seguimiento a Largo Plazo</strong>.',it:'Eseguire prima i calcoli in <strong>Analisi del Rischio Strutturale</strong> e/o <strong>Follow-Up a Lungo Termine</strong>.'},
+  rpOptionalNote:{tr:'Aşağıdaki alanların doldurulması zorunlu değildir. Bilgi girilmeksizin de rapor oluşturulabilir.',en:'Completing the fields below is not mandatory. A report may be generated without entering any information.',de:'Das Ausfüllen der nachstehenden Felder ist nicht obligatorisch. Ein Bericht kann auch ohne Eingabe von Informationen erstellt werden.',es:'Completar los campos a continuación no es obligatorio. El informe puede generarse sin introducir información alguna.',it:'La compilazione dei campi sottostanti non è obbligatoria. Il report può essere generato anche senza inserire alcuna informazione.'},
+  rpPrivacyTitle:{tr:'Veri Gizliliği ve Güvenlik Bildirimi',en:'Data Privacy and Security Notice',de:'Datenschutz- und Sicherheitshinweis',es:'Aviso de Privacidad y Seguridad de Datos',it:'Informativa sulla Privacy e Sicurezza dei Dati'},
+  rpPrivacyText:{tr:'dtcrisk.com, girilen hiçbir kişisel veriyi depolamamakta, kayıt altına almamakta veya üçüncü taraflarla paylaşmamaktadır. Tüm hesaplamalar ve rapor oluşturma işlemleri yalnızca kullanıcının tarayıcısında (istemci tarafında) gerçekleştirilmekte olup, herhangi bir veri sunucuya iletilmemektedir. Oturum sonlandırıldığında girilen tüm bilgiler otomatik olarak silinmektedir.',en:'dtcrisk.com does not store, record, or share any personal data entered by the user. All calculations and report generation processes are performed exclusively within the user\'s browser (client-side), and no data is transmitted to any server. All information entered is automatically deleted upon termination of the session.',de:'dtcrisk.com speichert, erfasst oder teilt keinerlei vom Benutzer eingegebene personenbezogene Daten. Sämtliche Berechnungen und Berichtserstellungsprozesse werden ausschließlich im Browser des Benutzers (clientseitig) durchgeführt; es werden keine Daten an einen Server übermittelt. Alle eingegebenen Informationen werden bei Beendigung der Sitzung automatisch gelöscht.',es:'dtcrisk.com no almacena, registra ni comparte ningún dato personal introducido por el usuario. Todos los cálculos y procesos de generación de informes se realizan exclusivamente en el navegador del usuario (lado del cliente), y ningún dato se transmite a ningún servidor. Toda la información introducida se elimina automáticamente al finalizar la sesión.',it:'dtcrisk.com non memorizza, registra né condivide alcun dato personale inserito dall\'utente. Tutti i calcoli e i processi di generazione dei report vengono eseguiti esclusivamente nel browser dell\'utente (lato client) e nessun dato viene trasmesso ad alcun server. Tutte le informazioni inserite vengono automaticamente eliminate al termine della sessione.'},
   rpDownload:{tr:'📄 PDF Olarak İndir',en:'📄 Download as PDF',de:'📄 Als PDF herunterladen',es:'📄 Descargar como PDF',it:'📄 Scarica come PDF'},
   // Sayfa 4 - Sorun Bildir
   issTitle:{tr:'🐛 Sorun Bildir',en:'🐛 Report Issue',de:'🐛 Problem melden',es:'🐛 Reportar Problema',it:'🐛 Segnala Problema'},
@@ -2361,6 +2400,32 @@ function setLang(l) {
     document.getElementById('lb-'+k).className = 'lb'+(l===k?' on':'');
   });
 
+  // URL'yi güncelle (sayfa yenilenmeden)
+  const _newUrl = new URL(window.location);
+  _newUrl.searchParams.set('lang', l);
+  window.history.replaceState({}, '', _newUrl);
+  // HTML lang attribute güncelle
+  document.documentElement.lang = l;
+  // Meta description güncelle (SEO)
+  const _metaDescs = {
+    tr:'Diferansiye Tiroid Kanseri (DTC) için ATA 2025 kılavuzuna dayalı yapısal ve dinamik risk stratifikasyon motoru. PTC, FTC, Hürthle hücreli tiroid kanseri risk hesaplama, L-Tiroksin doz önerisi, PDF rapor oluşturma.',
+    en:'Differentiated Thyroid Cancer (DTC) structural and dynamic risk stratification engine based on ATA 2025 guidelines. PTC, FTC, Hürthle cell thyroid cancer risk calculator, L-Thyroxine dose recommendation, PDF report generation.',
+    de:'Strukturelle und dynamische Risikostratifizierungs-Engine für differenziertes Schilddrüsenkarzinom (DTC) basierend auf den ATA-2025-Leitlinien. PTC, FTC, Hürthle-Zell-Risikoberechnung, L-Thyroxin-Dosisempfehlung, PDF-Berichterstellung.',
+    es:'Motor de estratificación de riesgo estructural y dinámico para cáncer diferenciado de tiroides (CDT) basado en las guías ATA 2025. Cálculo de riesgo PTC, FTC, Hürthle, recomendación de dosis de L-Tiroxina, generación de informes PDF.',
+    it:'Motore di stratificazione del rischio strutturale e dinamico per il carcinoma tiroideo differenziato (DTC) basato sulle linee guida ATA 2025. Calcolo del rischio PTC, FTC, Hürthle, raccomandazione dosaggio L-Tiroxina, generazione report PDF.'
+  };
+  const _metaDesc = document.querySelector('meta[name="description"]');
+  if(_metaDesc && _metaDescs[l]) _metaDesc.content = _metaDescs[l];
+  // Title güncelle
+  const _titles = {
+    tr:'DTC Risk Stratifikasyon Motoru — ATA 2025 | Tiroid Kanser Risk Hesaplama',
+    en:'DTC Risk Stratification Engine — ATA 2025 | Thyroid Cancer Risk Calculator',
+    de:'DTC-Risikostratifizierungs-Engine — ATA 2025 | Schilddrüsenkrebs-Risikorechner',
+    es:'Motor de Estratificación de Riesgo DTC — ATA 2025 | Calculadora de Riesgo de Cáncer de Tiroides',
+    it:'Motore di Stratificazione del Rischio DTC — ATA 2025 | Calcolatore Rischio Cancro Tiroideo'
+  };
+  if(_titles[l]) document.title = _titles[l];
+
   // Apply data-tr / data-en to ALL elements
   applyDataLang();
 
@@ -2464,7 +2529,8 @@ function applyUILang(l){
     'rpTitle':'rpTitle','rpDesc':'rpDesc',
     'rpPatientNameLabel':'rpPatientFirst','rpPatientSurnameLabel':'rpPatientLast',
     'rpDoctorLabel':'rpPhysician','rpInstitutionLabel':'rpInstitution',
-    'rpGenerateBtn':'rpGenerate','rpEmptyText':'rpEmpty'
+    'rpGenerateBtn':'rpGenerate','rpEmptyText':'rpEmpty',
+    'rpOptionalNote':'rpOptionalNote','rpPrivacyTitle':'rpPrivacyTitle','rpPrivacyText':'rpPrivacyText'
   };
   Object.entries(rp3).forEach(([id,key])=>{
     const el=document.getElementById(id);
